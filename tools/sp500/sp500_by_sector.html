@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S&amp;P 500 최근 5개년 유니버스 (섹터별)</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --line:#2a2f3a; --fg:#e6e9ef; --muted:#8b93a7; --cur:#3fb950; --rem:#d29922; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system,Segoe UI,Roboto,'Malgun Gothic',sans-serif; }
+  header { padding:24px 20px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--bg); z-index:5; }
+  h1 { margin:0 0 6px; font-size:20px; }
+  .meta { color:var(--muted); font-size:13px; }
+  .stats { display:flex; gap:16px; margin-top:12px; flex-wrap:wrap; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px; }
+  .stat b { font-size:20px; }
+  #q { margin-top:14px; width:100%; max-width:420px; padding:9px 12px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--fg); font-size:14px; }
+  main { padding:20px; max-width:1000px; margin:0 auto; }
+  .sector { margin-bottom:28px; }
+  h2 { font-size:16px; border-left:3px solid var(--cur); padding-left:10px; margin:0 0 10px; }
+  .cnt { color:var(--muted); font-weight:400; font-size:12px; margin-left:6px; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  th,td { text-align:left; padding:8px 12px; border-bottom:1px solid var(--line); font-size:14px; }
+  th { color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.03em; }
+  tr:last-child td { border-bottom:0; }
+  .tk { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:600; }
+  .badge { font-size:11px; padding:2px 8px; border-radius:20px; font-weight:600; }
+  .badge.cur { color:var(--cur); background:rgba(63,185,80,.12); }
+  .badge.rem { color:var(--rem); background:rgba(210,153,34,.12); }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>S&amp;P 500 최근 5개년 유니버스 — 섹터별</h1>
+  <div class="meta">기간 내 한 번이라도 편입된 모든 종목의 합집합 · 생성 2026-07-02 · 출처: Wikipedia (GICS 섹터)</div>
+  <div class="stats">
+    <div class="stat"><b>593</b><br>총 종목(합집합)</div>
+    <div class="stat"><b style="color:var(--cur)">503</b><br>현재 구성</div>
+    <div class="stat"><b style="color:var(--rem)">90</b><br>기간 내 편출</div>
+    <div class="stat"><b>12</b><br>섹터 수</div>
+  </div>
+  <input id="q" type="search" placeholder="티커·기업명·섹터 검색…">
+</header>
+<main>
+    <section class="sector" data-sector="Communication Services">
+      <h2>Communication Services <span class="cnt">25종 · 현재 23 / 편출 2</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="current"><td class="tk">CHTR</td><td>Charter Communications</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CMCSA</td><td>Comcast</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DIS</td><td>Walt Disney Company (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EA</td><td>Electronic Arts</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ECHO</td><td>EchoStar</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FOX</td><td>Fox Corporation (Class B)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FOXA</td><td>Fox Corporation (Class A)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GOOG</td><td>Alphabet Inc. (Class C)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GOOGL</td><td>Alphabet Inc. (Class A)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">LUMN</td><td>Lumen Technologies</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">LYV</td><td>Live Nation Entertainment</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">META</td><td>Meta Platforms</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">MTCH</td><td>Match Group</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">NFLX</td><td>Netflix</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NWS</td><td>News Corp (Class B)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NWSA</td><td>News Corp (Class A)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">OMC</td><td>Omnicom Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PSKY</td><td>Paramount Skydance Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">T</td><td>AT&amp;T</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TKO</td><td>TKO Group Holdings</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TMUS</td><td>T-Mobile US</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TTD</td><td>Trade Desk (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TTWO</td><td>Take-Two Interactive</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VZ</td><td>Verizon</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WBD</td><td>Warner Bros. Discovery</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Consumer Discretionary">
+      <h2>Consumer Discretionary <span class="cnt">63종 · 현재 47 / 편출 16</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="removed"><td class="tk">AAP</td><td>Advance Auto Parts</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">ABNB</td><td>Airbnb</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AMZN</td><td>Amazon</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">APTV</td><td>Aptiv</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AZO</td><td>AutoZone</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">BBWI</td><td>Bath &amp; Body Works, Inc.</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">BBY</td><td>Best Buy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BKNG</td><td>Booking Holdings</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">BWA</td><td>BorgWarner</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">CCL</td><td>Carnival Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CMG</td><td>Chipotle Mexican Grill</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CVNA</td><td>Carvana</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">CZR</td><td>Caesars Entertainment</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">DASH</td><td>DoorDash</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DECK</td><td>Deckers Brands</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DHI</td><td>D. R. Horton</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DPZ</td><td>Domino&#x27;s</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DRI</td><td>Darden Restaurants</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EBAY</td><td>eBay Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">ETSY</td><td>Etsy</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">EXPE</td><td>Expedia Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">F</td><td>Ford Motor Company</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GM</td><td>General Motors</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GPC</td><td>Genuine Parts Company</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GRMN</td><td>Garmin</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HAS</td><td>Hasbro</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HD</td><td>Home Depot (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HLT</td><td>Hilton Worldwide</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">KMX</td><td>CarMax</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">LEG</td><td>Leggett &amp; Platt</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">LEN</td><td>Lennar</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">LKQ</td><td>LKQ Corporation</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">LOW</td><td>Lowe&#x27;s</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LULU</td><td>Lululemon Athletica</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LVS</td><td>Las Vegas Sands</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MAR</td><td>Marriott International</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">MBC</td><td>MasterBrand</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">MCD</td><td>McDonald&#x27;s</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MGM</td><td>MGM Resorts</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">MHK</td><td>Mohawk Industries</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">NCLH</td><td>Norwegian Cruise Line Holdings</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NKE</td><td>Nike, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NVR</td><td>NVR, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ORLY</td><td>O’Reilly Automotive</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">PENN</td><td>Penn Entertainment</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">PHM</td><td>PulteGroup</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">PVH</td><td>PVH</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">RCL</td><td>Royal Caribbean Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">RL</td><td>Ralph Lauren Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ROST</td><td>Ross Stores</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SBUX</td><td>Starbucks</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TJX</td><td>TJX Companies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TPR</td><td>Tapestry, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TSCO</td><td>Tractor Supply</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TSLA</td><td>Tesla, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">UA</td><td>Under Armour (Class C)</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">UAA</td><td>Under Armour (Class A)</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">ULTA</td><td>Ulta Beauty</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">VFC</td><td>VF Corporation</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">WHR</td><td>Whirlpool Corporation</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">WSM</td><td>Williams-Sonoma, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WYNN</td><td>Wynn Resorts</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">YUM</td><td>Yum! Brands</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Consumer Staples">
+      <h2>Consumer Staples <span class="cnt">38종 · 현재 34 / 편출 4</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="current"><td class="tk">ADM</td><td>Archer Daniels Midland</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BF.B</td><td>Brown–Forman</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BG</td><td>Bunge Global</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">CAG</td><td>Conagra Brands</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">CASY</td><td>Casey&#x27;s</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CHD</td><td>Church &amp; Dwight</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CL</td><td>Colgate-Palmolive</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CLX</td><td>Clorox</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">COST</td><td>Costco</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">CPB</td><td>Campbell&#x27;s</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">DG</td><td>Dollar General</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DLTR</td><td>Dollar Tree</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EL</td><td>Estée Lauder Companies (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GIS</td><td>General Mills</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HRL</td><td>Hormel Foods</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HSY</td><td>Hershey Company (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KDP</td><td>Keurig Dr Pepper</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KHC</td><td>Kraft Heinz</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KMB</td><td>Kimberly-Clark</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KO</td><td>Coca-Cola Company (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KR</td><td>Kroger</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KVUE</td><td>Kenvue</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">LW</td><td>Lamb Weston</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">MDLZ</td><td>Mondelez International</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MKC</td><td>McCormick &amp; Company</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MNST</td><td>Monster Beverage</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MO</td><td>Altria</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">NWL</td><td>Newell Brands</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">PEP</td><td>PepsiCo</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PG</td><td>Procter &amp; Gamble</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PM</td><td>Philip Morris International</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SJM</td><td>J.M. Smucker Company (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">STZ</td><td>Constellation Brands</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SYY</td><td>Sysco</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TAP</td><td>Molson Coors Beverage Company</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TGT</td><td>Target Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TSN</td><td>Tyson Foods</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WMT</td><td>Walmart</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Energy">
+      <h2>Energy <span class="cnt">23종 · 현재 21 / 편출 2</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="current"><td class="tk">APA</td><td>APA Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BKR</td><td>Baker Hughes</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">COP</td><td>ConocoPhillips</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">CTRA</td><td>Coterra Energy</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">CVX</td><td>Chevron Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DVN</td><td>Devon Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EOG</td><td>EOG Resources</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EQT</td><td>EQT Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EXE</td><td>Expand Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FANG</td><td>Diamondback Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HAL</td><td>Halliburton</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KMI</td><td>Kinder Morgan</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MPC</td><td>Marathon Petroleum</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">NOV</td><td>Nov</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">OKE</td><td>Oneok</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">OXY</td><td>Occidental Petroleum</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PSX</td><td>Phillips 66</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SLB</td><td>Schlumberger</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TPL</td><td>Texas Pacific Land Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TRGP</td><td>Targa Resources</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VLO</td><td>Valero Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WMB</td><td>Williams Companies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">XOM</td><td>ExxonMobil</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Financials">
+      <h2>Financials <span class="cnt">82종 · 현재 76 / 편출 6</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="current"><td class="tk">ACGL</td><td>Arch Capital Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AFL</td><td>Aflac</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AIG</td><td>American International Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AIZ</td><td>Assurant</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AJG</td><td>Arthur J. Gallagher &amp; Co.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ALL</td><td>Allstate</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AMP</td><td>Ameriprise Financial</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AON</td><td>Aon plc</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">APO</td><td>Apollo Global Management</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ARES</td><td>Ares Management</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AXP</td><td>American Express</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BAC</td><td>Bank of America</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BEN</td><td>Franklin Resources</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BLK</td><td>BlackRock</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BNY</td><td>BNY Mellon</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BRK.B</td><td>Berkshire Hathaway</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BRO</td><td>Brown &amp; Brown</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BX</td><td>Blackstone Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">C</td><td>Citigroup</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CB</td><td>Chubb Limited</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CBOE</td><td>Cboe Global Markets</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CFG</td><td>Citizens Financial Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CINF</td><td>Cincinnati Financial</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CME</td><td>CME Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">COF</td><td>Capital One</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">COIN</td><td>Coinbase</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CPAY</td><td>Corpay</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EG</td><td>Everest Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ERIE</td><td>Erie Indemnity</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FDS</td><td>FactSet</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FIS</td><td>Fidelity National Information Services</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FISV</td><td>Fiserv</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FITB</td><td>Fifth Third Bancorp</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GL</td><td>Globe Life</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GPN</td><td>Global Payments</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GS</td><td>Goldman Sachs</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HBAN</td><td>Huntington Bancshares</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HIG</td><td>Hartford (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HOOD</td><td>Robinhood Markets</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">IBKR</td><td>Interactive Brokers</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ICE</td><td>Intercontinental Exchange</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">IVZ</td><td>Invesco</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">JKHY</td><td>Jack Henry &amp; Associates</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">JPM</td><td>JPMorgan Chase</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KEY</td><td>KeyCorp</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KKR</td><td>KKR &amp; Co.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">L</td><td>Loews Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">LNC</td><td>Lincoln National Corporation</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">MA</td><td>Mastercard</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MCO</td><td>Moody&#x27;s Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MET</td><td>MetLife</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">MKTX</td><td>MarketAxess</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">MRSH</td><td>Marsh McLennan</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MS</td><td>Morgan Stanley</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MSCI</td><td>MSCI Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MTB</td><td>M&amp;T Bank</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NDAQ</td><td>Nasdaq, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NTRS</td><td>Northern Trust</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PFG</td><td>Principal Financial Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PGR</td><td>Progressive Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PNC</td><td>PNC Financial Services</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PRU</td><td>Prudential Financial</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PYPL</td><td>PayPal</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">RF</td><td>Regions Financial Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">RJF</td><td>Raymond James Financial</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">SBNY</td><td>Signature Bank</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">SCHW</td><td>Charles Schwab Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SPGI</td><td>S&amp;P Global</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">STT</td><td>State Street Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SYF</td><td>Synchrony Financial</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TFC</td><td>Truist Financial</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TROW</td><td>T. Rowe Price</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TRV</td><td>Travelers Companies (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">UNM</td><td>Unum</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">USB</td><td>U.S. Bancorp</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">V</td><td>Visa Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WFC</td><td>Wells Fargo</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WRB</td><td>W. R. Berkley Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WTW</td><td>Willis Towers Watson</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">WU</td><td>Western Union</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">XYZ</td><td>Block, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">ZION</td><td>Zions Bancorporation</td><td><span class='badge rem'>편출</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Health Care">
+      <h2>Health Care <span class="cnt">66종 · 현재 59 / 편출 7</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="current"><td class="tk">A</td><td>Agilent Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ABBV</td><td>AbbVie</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ABT</td><td>Abbott Laboratories</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ALGN</td><td>Align Technology</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AMGN</td><td>Amgen</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BAX</td><td>Baxter International</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BDX</td><td>Becton Dickinson</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BIIB</td><td>Biogen</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">BIO</td><td>Bio-Rad Laboratories</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">BMY</td><td>Bristol Myers Squibb</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BSX</td><td>Boston Scientific</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CAH</td><td>Cardinal Health</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CI</td><td>Cigna</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CNC</td><td>Centene Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">COO</td><td>Cooper Companies (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">COR</td><td>Cencora</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CRL</td><td>Charles River Laboratories</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CVS</td><td>CVS Health</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DGX</td><td>Quest Diagnostics</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DHR</td><td>Danaher Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DVA</td><td>DaVita</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DXCM</td><td>Dexcom</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ELV</td><td>Elevance Health</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EW</td><td>Edwards Lifesciences</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GEHC</td><td>GE HealthCare</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GILD</td><td>Gilead Sciences</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HCA</td><td>HCA Healthcare</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HSIC</td><td>Henry Schein</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HUM</td><td>Humana</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">IDXX</td><td>Idexx Laboratories</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">ILMN</td><td>Illumina, Inc.</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">INCY</td><td>Incyte</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">IQV</td><td>IQVIA</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ISRG</td><td>Intuitive Surgical</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">JNJ</td><td>Johnson &amp; Johnson</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LH</td><td>Labcorp</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LLY</td><td>Lilly (Eli)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MCK</td><td>McKesson Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MDT</td><td>Medtronic</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">MOH</td><td>Molina Healthcare</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">MRK</td><td>Merck &amp; Co.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MRNA</td><td>Moderna</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MTD</td><td>Mettler Toledo</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">OGN</td><td>Organon &amp; Co.</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">PFE</td><td>Pfizer</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PODD</td><td>Insulet Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">PRGO</td><td>Perrigo</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">REGN</td><td>Regeneron Pharmaceuticals</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">RMD</td><td>ResMed</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">RVTY</td><td>Revvity</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SOLV</td><td>Solventum</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">STE</td><td>Steris</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SYK</td><td>Stryker Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TECH</td><td>Bio-Techne</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">TFX</td><td>Teleflex</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">TMO</td><td>Thermo Fisher Scientific</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">UHS</td><td>Universal Health Services</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">UNH</td><td>UnitedHealth Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VEEV</td><td>Veeva Systems</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VRTX</td><td>Vertex Pharmaceuticals</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VTRS</td><td>Viatris</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WAT</td><td>Waters Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WST</td><td>West Pharmaceutical Services</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">XRAY</td><td>Dentsply Sirona</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">ZBH</td><td>Zimmer Biomet</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ZTS</td><td>Zoetis</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Industrials">
+      <h2>Industrials <span class="cnt">86종 · 현재 81 / 편출 5</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="removed"><td class="tk">AAL</td><td>American Airlines Group</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">ADP</td><td>Automatic Data Processing</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">ALK</td><td>Alaska Air Group</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">ALLE</td><td>Allegion</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AME</td><td>Ametek</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">AMTM</td><td>Amentum</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">AOS</td><td>A. O. Smith</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AXON</td><td>Axon Enterprise</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BA</td><td>Boeing</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BLDR</td><td>Builders FirstSource</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BR</td><td>Broadridge Financial Solutions</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CARR</td><td>Carrier Global</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CAT</td><td>Caterpillar Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CHRW</td><td>C.H. Robinson</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CMI</td><td>Cummins</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CPRT</td><td>Copart</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CSX</td><td>CSX Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CTAS</td><td>Cintas</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DAL</td><td>Delta Air Lines</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DE</td><td>Deere &amp; Company</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DOV</td><td>Dover Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EFX</td><td>Equifax</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EME</td><td>Emcor</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EMR</td><td>Emerson Electric</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ETN</td><td>Eaton Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EXPD</td><td>Expeditors International</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FAST</td><td>Fastenal</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FDX</td><td>FedEx</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FDXF</td><td>FedEx Freight</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FIX</td><td>Comfort Systems USA</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FTV</td><td>Fortive</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GD</td><td>General Dynamics</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GE</td><td>GE Aerospace</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GEV</td><td>GE Vernova</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GNRC</td><td>Generac</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GWW</td><td>W. W. Grainger</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HII</td><td>Huntington Ingalls Industries</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HON</td><td>Honeywell Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HONA</td><td>Honeywell Aerospace</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HUBB</td><td>Hubbell Incorporated</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HWM</td><td>Howmet Aerospace</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">IEX</td><td>IDEX Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">IR</td><td>Ingersoll Rand</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ITW</td><td>Illinois Tool Works</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">J</td><td>Jacobs Solutions</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">JBHT</td><td>J.B. Hunt</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">JCI</td><td>Johnson Controls</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LDOS</td><td>Leidos</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LHX</td><td>L3Harris</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LII</td><td>Lennox International</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LMT</td><td>Lockheed Martin</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LUV</td><td>Southwest Airlines</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MAS</td><td>Masco</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MMM</td><td>3M</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NDSN</td><td>Nordson Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NOC</td><td>Northrop Grumman</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NSC</td><td>Norfolk Southern</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ODFL</td><td>Old Dominion</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">OTIS</td><td>Otis Worldwide</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PAYX</td><td>Paychex</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PCAR</td><td>Paccar</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PH</td><td>Parker Hannifin</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PNR</td><td>Pentair</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">POOL</td><td>Pool Corporation</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">PWR</td><td>Quanta Services</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">RHI</td><td>Robert Half</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">ROK</td><td>Rockwell Automation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ROL</td><td>Rollins, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">RSG</td><td>Republic Services</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">RTX</td><td>RTX Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SNA</td><td>Snap-on</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SWK</td><td>Stanley Black &amp; Decker</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TDG</td><td>TransDigm Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TT</td><td>Trane Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TXT</td><td>Textron</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">UAL</td><td>United Airlines Holdings</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">UBER</td><td>Uber</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">UNP</td><td>Union Pacific Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">UPS</td><td>United Parcel Service</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">URI</td><td>United Rentals</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VLTO</td><td>Veralto</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VRSK</td><td>Verisk Analytics</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VRT</td><td>Vertiv</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WAB</td><td>Wabtec</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WM</td><td>Waste Management</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">XYL</td><td>Xylem Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Information Technology">
+      <h2>Information Technology <span class="cnt">81종 · 현재 74 / 편출 7</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="current"><td class="tk">AAPL</td><td>Apple Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ACN</td><td>Accenture</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ADBE</td><td>Adobe Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ADI</td><td>Analog Devices</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ADSK</td><td>Autodesk</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AKAM</td><td>Akamai Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AMAT</td><td>Applied Materials</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AMD</td><td>Advanced Micro Devices</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ANET</td><td>Arista Networks</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">APH</td><td>Amphenol</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">APP</td><td>AppLovin</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AVGO</td><td>Broadcom</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CDNS</td><td>Cadence Design Systems</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CDW</td><td>CDW Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CIEN</td><td>Ciena</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">COHR</td><td>Coherent Corp.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CRM</td><td>Salesforce</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CRWD</td><td>CrowdStrike</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CSCO</td><td>Cisco</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CTSH</td><td>Cognizant</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DDOG</td><td>Datadog</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DELL</td><td>Dell Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">DXC</td><td>DXC Technology</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">ENPH</td><td>Enphase Energy</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">EPAM</td><td>EPAM Systems</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">FFIV</td><td>F5, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FICO</td><td>Fair Isaac</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FLEX</td><td>Flex Ltd.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FSLR</td><td>First Solar</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FTNT</td><td>Fortinet</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GDDY</td><td>GoDaddy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GEN</td><td>Gen Digital</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">GLW</td><td>Corning Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HPE</td><td>Hewlett Packard Enterprise</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HPQ</td><td>HP Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">IBM</td><td>IBM</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">INTC</td><td>Intel</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">INTU</td><td>Intuit</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">IPGP</td><td>IPG Photonics</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">IT</td><td>Gartner</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">JBL</td><td>Jabil</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KEYS</td><td>Keysight Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KLAC</td><td>KLA Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LITE</td><td>Lumentum</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LRCX</td><td>Lam Research</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MCHP</td><td>Microchip Technology</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MPWR</td><td>Monolithic Power Systems</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MRVL</td><td>Marvell Technology</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MSFT</td><td>Microsoft</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MSI</td><td>Motorola Solutions</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MU</td><td>Micron Technology</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NOW</td><td>ServiceNow</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NTAP</td><td>NetApp</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NVDA</td><td>Nvidia</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NXPI</td><td>NXP Semiconductors</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ON</td><td>ON Semiconductor</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ORCL</td><td>Oracle Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PANW</td><td>Palo Alto Networks</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">PAYC</td><td>Paycom</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">PLTR</td><td>Palantir Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PTC</td><td>PTC Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">Q</td><td>Qnity Electronics</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">QCOM</td><td>Qualcomm</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">QRVO</td><td>Qorvo</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">ROP</td><td>Roper Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">SEDG</td><td>SolarEdge</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">SMCI</td><td>Supermicro</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SNDK</td><td>Sandisk</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SNPS</td><td>Synopsys</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">STX</td><td>Seagate Technology</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SWKS</td><td>Skyworks Solutions</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TDY</td><td>Teledyne Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TEL</td><td>TE Connectivity</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TER</td><td>Teradyne</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TRMB</td><td>Trimble Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TXN</td><td>Texas Instruments</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">TYL</td><td>Tyler Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VRSN</td><td>Verisign</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WDAY</td><td>Workday, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WDC</td><td>Western Digital</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ZBRA</td><td>Zebra Technologies</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Materials">
+      <h2>Materials <span class="cnt">30종 · 현재 26 / 편출 4</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="current"><td class="tk">ALB</td><td>Albemarle Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AMCR</td><td>Amcor</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">APD</td><td>Air Products</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AVY</td><td>Avery Dennison</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BALL</td><td>Ball Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">CE</td><td>Celanese</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">CF</td><td>CF Industries</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CRH</td><td>CRH plc</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CTVA</td><td>Corteva</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DD</td><td>DuPont</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DOW</td><td>Dow Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ECL</td><td>Ecolab</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">EMN</td><td>Eastman Chemical Co.</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">FCX</td><td>Freeport-McMoRan</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">FMC</td><td>FMC Corporation</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">IFF</td><td>International Flavors &amp; Fragrances</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">IP</td><td>International Paper</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LIN</td><td>Linde plc</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LYB</td><td>LyondellBasell</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MLM</td><td>Martin Marietta Materials</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MOS</td><td>Mosaic Company (The)</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NEM</td><td>Newmont</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NUE</td><td>Nucor</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PKG</td><td>Packaging Corporation of America</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PPG</td><td>PPG Industries</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SHW</td><td>Sherwin-Williams</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">SOLS</td><td>Solstice Advanced Materials</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">STLD</td><td>Steel Dynamics</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SW</td><td>Smurfit Westrock</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VMC</td><td>Vulcan Materials Company</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Real Estate">
+      <h2>Real Estate <span class="cnt">32종 · 현재 31 / 편출 1</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="current"><td class="tk">AMT</td><td>American Tower</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ARE</td><td>Alexandria Real Estate Equities</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AVB</td><td>AvalonBay Communities</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">BXP</td><td>BXP, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CBRE</td><td>CBRE Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CCI</td><td>Crown Castle</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CPT</td><td>Camden Property Trust</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CSGP</td><td>CoStar Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DLR</td><td>Digital Realty</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DOC</td><td>Healthpeak Properties</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EQIX</td><td>Equinix</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EQR</td><td>Equity Residential</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ESS</td><td>Essex Property Trust</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EXR</td><td>Extra Space Storage</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FRT</td><td>Federal Realty Investment Trust</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">HST</td><td>Host Hotels &amp; Resorts</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">INVH</td><td>Invitation Homes</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">IRM</td><td>Iron Mountain</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">KIM</td><td>Kimco Realty</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">MAA</td><td>Mid-America Apartment Communities</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">O</td><td>Realty Income</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PLD</td><td>Prologis</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PSA</td><td>Public Storage</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">REG</td><td>Regency Centers</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SBAC</td><td>SBA Communications</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SPG</td><td>Simon Property Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">UDR</td><td>UDR, Inc.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VICI</td><td>Vici Properties</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="removed"><td class="tk">VNO</td><td>Vornado Realty Trust</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="current"><td class="tk">VTR</td><td>Ventas</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WELL</td><td>Welltower</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WY</td><td>Weyerhaeuser</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="Utilities">
+      <h2>Utilities <span class="cnt">31종 · 현재 31 / 편출 0</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="current"><td class="tk">AEE</td><td>Ameren</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AEP</td><td>American Electric Power</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AES</td><td>AES Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ATO</td><td>Atmos Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">AWK</td><td>American Water Works</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CEG</td><td>Constellation Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CMS</td><td>CMS Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">CNP</td><td>CenterPoint Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">D</td><td>Dominion Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DTE</td><td>DTE Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">DUK</td><td>Duke Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ED</td><td>Consolidated Edison</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EIX</td><td>Edison International</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ES</td><td>Eversource Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">ETR</td><td>Entergy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EVRG</td><td>Evergy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">EXC</td><td>Exelon</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">FE</td><td>FirstEnergy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">LNT</td><td>Alliant Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NEE</td><td>NextEra Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NI</td><td>NiSource</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">NRG</td><td>NRG Energy</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PCG</td><td>PG&amp;E Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PEG</td><td>Public Service Enterprise Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PNW</td><td>Pinnacle West Capital</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">PPL</td><td>PPL Corporation</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SO</td><td>Southern Company</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">SRE</td><td>Sempra</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">VST</td><td>Vistra Corp.</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">WEC</td><td>WEC Energy Group</td><td><span class='badge cur'>현재</span></td></tr>
+      <tr data-status="current"><td class="tk">XEL</td><td>Xcel Energy</td><td><span class='badge cur'>현재</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="sector" data-sector="미분류 (편출)">
+      <h2>미분류 (편출) <span class="cnt">36종 · 현재 0 / 편출 36</span></h2>
+      <table>
+        <thead><tr><th>티커</th><th>기업명</th><th>상태</th></tr></thead>
+        <tbody>
+      <tr data-status="removed"><td class="tk">ABMD</td><td>Abiomed</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">ALXN</td><td>Alexion Pharmaceuticals</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">ANSS</td><td>Ansys</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">ATVI</td><td>Activision Blizzard</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">CERN</td><td>Cerner</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">CMA</td><td>Comerica</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">CTLT</td><td>Catalent</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">CTXS</td><td>Citrix Systems</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">DAY</td><td>Dayforce</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">DFS</td><td>Discover Financial</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">DISCA</td><td>Discovery, Inc.</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">DISCK</td><td>Discovery, Inc.</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">DISH</td><td>Dish Network</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">DRE</td><td>Duke Realty</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">FBHS</td><td>Fortune Brands Home &amp; Security</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">FRC</td><td>First Republic Bank</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">GPS</td><td>Gap</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">HBI</td><td>Hanesbrands</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">HES</td><td>Hess Corporation</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">HOLX</td><td>Hologic</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">INFO</td><td>IHS Markit</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">IPG</td><td>Interpublic Group</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">JNPR</td><td>Juniper Networks</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">K</td><td>Kellanova</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">KSU</td><td>Kansas City Southern</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">MRO</td><td>Marathon Oil</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">MXIM</td><td>Maxim Integrated</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">NLSN</td><td>Nielsen Holdings</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">PBCT</td><td>People&#x27;s United Financial</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">PXD</td><td>Pioneer Natural Resources</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">RE</td><td>Everest Re Group</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">SEE</td><td>Sealed Air</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">SIVB</td><td>SVB Financial Group</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">TWTR</td><td>Twitter</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">WBA</td><td>Walgreens Boots Alliance</td><td><span class='badge rem'>편출</span></td></tr>
+      <tr data-status="removed"><td class="tk">XLNX</td><td>Xilinx</td><td><span class='badge rem'>편출</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+</main>
+<script>
+  const q = document.getElementById('q');
+  q.addEventListener('input', () => {
+    const term = q.value.trim().toLowerCase();
+    document.querySelectorAll('section.sector').forEach(sec => {
+      let shown = 0;
+      const secName = sec.dataset.sector.toLowerCase();
+      sec.querySelectorAll('tbody tr').forEach(tr => {
+        const hay = (tr.textContent + ' ' + secName).toLowerCase();
+        const hit = !term || hay.includes(term);
+        tr.classList.toggle('hidden', !hit);
+        if (hit) shown++;
+      });
+      sec.classList.toggle('hidden', shown === 0);
+    });
+  });
+</script>
+</body>
+</html>
