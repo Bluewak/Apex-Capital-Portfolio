@@ -19,7 +19,7 @@
 | **IPS Agent** | 성향 → 투자정책서 | 템플릿 렌더링 | `InvestorProfile` → `IPSDocument` | 04 |
 | **Allocation Engine** | 성향 → 모델포트폴리오 배분 | 고정비중 4종 | `profile` → `Allocation`(티커·비중) | 02 §3, 03 §3 |
 | **Data Layer** | 시세·환율·이벤트 수집/정제 | yfinance/FRED/Stooq | 티커 → 조정가격 시계열 | 02 §5, D7 |
-| **Backtest Engine** | 15년+ 백테스트·시나리오 | 벡터화 시뮬레이션 | `Allocation`+가격 → `BacktestResult` | 01 §5, 05 §2 |
+| **Backtest Engine** | 20년+ 백테스트·시나리오 | 벡터화 시뮬레이션 | `Allocation`+가격 → `BacktestResult` | 01 §5, 05 §2 |
 | **Risk Engine** | 리스크 지표·민감도·집중도 | 05 계산식 | 수익률시계열 → `RiskReport` | 05 §1,4 |
 | **Compliance Guardrail** | 성향별 상한·강등·차단 | 하드룰 | `RiskReport`+`profile` → `breaches`/강등 | 03 §4, 05 §3 |
 | **Report Generator** | 설명 리포트(자연어) | 룰 기반 문장→후에 LLM | 전 단계 산출물 → 리포트(PDF/웹) | 01 §4, 04 §2 |
@@ -116,6 +116,7 @@ flowchart TD
 | USD/KRW 환율 | FRED `DEXKOUS` | KRW 표시 환산용 (D4) |
 | 무위험금리 | FRED (USD 3M T-Bill), CD금리(KRW) | Sharpe 계산 (05 §1.6) |
 | 배당·분할 이벤트 | yfinance | 반영 확인 (02 §5) |
+| 구성종목(유니버스) 이력 | Wikipedia + yfinance(섹터 보강) | v2 개별종목용, 생존편향 인지 합집합. 생성기 [tools/sp500](../tools/sp500/README.md) |
 
 - 상장 이전 구간 splice 정책은 **미확정** (02 §5 체크리스트) — 결정 필요.
 - 캐시/스냅샷: 백테스트 재현성 위해 수집 시점 원자료를 버전 태그와 함께 보관.
