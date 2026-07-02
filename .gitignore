@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# uv / venv
+.venv/
+venv/
+
+# 데이터 캐시 (재현성: 원자료는 버전태그로 별도 보관, 캐시는 커밋 안 함)
+data/
+*.parquet
+*.feather
+
+# 도구 산출물 (생성물 — 스크립트로 재생성)
+tools/sp500/*.html
+
+# 테스트/커버리지
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# 환경/비밀
+.env
+.env.*
+
+# OS/IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
