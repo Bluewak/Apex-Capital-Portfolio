@@ -64,7 +64,7 @@ def run(start: str = "2005-01-01", end: str | None = None) -> dict:
 
     rows: list[GateRow] = []
     for profile, weights in MODEL_PORTFOLIOS.items():
-        port = loader.portfolio_returns_quarterly(mat, weights)
+        port = loader.portfolio_returns_quarterly(mat, weights, cost_bps=loader.DEFAULT_COST_BPS)
         normal, windows = loader.split_normal_stress(port)
         rows.append(
             GateRow(
@@ -81,7 +81,9 @@ def run(start: str = "2005-01-01", end: str | None = None) -> dict:
     benchmarks: dict[str, dict] = {
         "S&P500 (SPY TR)": _bench_stats(mat["SPY"].to_numpy()),
         "60/40 (SPY60+IEF40)": _bench_stats(
-            loader.portfolio_returns_quarterly(mat, {"SPY": 0.6, "IEF": 0.4}).to_numpy()
+            loader.portfolio_returns_quarterly(
+                mat, {"SPY": 0.6, "IEF": 0.4}, cost_bps=loader.DEFAULT_COST_BPS
+            ).to_numpy()
         ),
     }
     try:

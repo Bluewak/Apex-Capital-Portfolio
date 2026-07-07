@@ -27,8 +27,13 @@ def run(
     loader 기반 provider를 주입(pipeline source='real').
     """
     fn = returns_fn or data.portfolio_returns
-    ret = np.asarray(fn(alloc.weights), dtype=float)
-    series = data.build_return_series(ret, currency=currency)
+    raw = fn(alloc.weights)
+    if isinstance(raw, pd.Series):  # 실데이터(M5): 실 거래일 인덱스 보존
+        ret = raw.to_numpy(dtype=float)
+        series = data.build_return_series(ret, currency=currency, index=raw.index)
+    else:
+        ret = np.asarray(raw, dtype=float)
+        series = data.build_return_series(ret, currency=currency)
 
     # disclosed 스트레스(참고): 합성 구간의 최악 롤링 1년 손실 1건(실 2008/2020/2022는 M5)
     worst_1y = metrics.var95_annual(ret)  # 근사 대역

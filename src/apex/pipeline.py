@@ -62,7 +62,7 @@ def run(
         _mat = loader.load_returns_matrix(universe)  # 1회 로드, 루프 내 재사용
 
         def returns_fn(w: dict[str, float]) -> object:
-            return loader.portfolio_returns_quarterly(_mat, w).to_numpy()
+            return loader.portfolio_returns_quarterly(_mat, w, cost_bps=loader.DEFAULT_COST_BPS)
 
     profile: InvestorProfile = investor.score(answers)
     path: list[str] = []
@@ -76,7 +76,7 @@ def run(
     for _ in range(6):  # 5구간 → 최대 4회 강등 + 여유
         alloc = allocation.build(profile.profile)
         _bt, series = backtest.run(alloc, currency="USD", returns_fn=returns_fn)
-        rr = risk.report(series, alloc, display_currency=currency)
+        rr = risk.report(series, alloc, display_currency=currency, normal_only=(source == "real"))
         dec = compliance.check(rr, profile)
         breaches.extend(dec.breaches)
 

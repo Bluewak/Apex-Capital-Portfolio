@@ -56,14 +56,23 @@ def portfolio_returns(weights: dict[str, float], n_days: int = N_DAYS) -> np.nda
 
 
 def build_return_series(
-    returns: np.ndarray, *, currency: str, data_version: str = DATA_VERSION
+    returns: np.ndarray,
+    *,
+    currency: str,
+    data_version: str = DATA_VERSION,
+    index: pd.DatetimeIndex | None = None,
 ) -> pd.Series:
     """ReturnSeries 파케이 계약(08 §3 M4) 준수 객체 생성 + 검증.
 
-    tz-aware DatetimeIndex(거래일 근사=영업일) · 단일 float64 `ret` · NaN 금지 ·
-    메타(currency, data_version). 실제 XNYS 캘린더 정렬은 M4 데이터 게이트에서.
+    tz-aware DatetimeIndex · 단일 float64 `ret` · NaN 금지 · 메타(currency, data_version).
+    ``index``=None이면 영업일 근사(합성 M4); 실데이터(M5)는 실 거래일 인덱스를 주입.
     """
-    idx = pd.bdate_range("2005-01-03", periods=len(returns), tz="UTC")
+    if index is None:
+        idx = pd.bdate_range("2005-01-03", periods=len(returns), tz="UTC")
+    else:
+        idx = pd.DatetimeIndex(index)
+        if idx.tz is None:
+            idx = idx.tz_localize("UTC")
     s = pd.Series(np.asarray(returns, dtype="float64"), index=idx, name="ret")
     s.attrs["currency"] = currency
     s.attrs["data_version"] = data_version
