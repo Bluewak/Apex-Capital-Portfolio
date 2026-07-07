@@ -10,14 +10,16 @@ from apex.schemas import ComplianceDecision, InvestorProfile, RiskReport
 from apex.schemas.enums import Profile
 from apex.schemas.risk import Breach
 
-# 05 §3 평시 상한 — var95_annual(양수 손실률). R5: 초안정형 행 추가.
-VAR_LIMIT: dict[Profile, float] = {
-    Profile.ULTRA_CONSERVATIVE: 0.05,
-    Profile.CONSERVATIVE: 0.08,
-    Profile.NEUTRAL: 0.15,
-    Profile.GROWTH: 0.22,
-    Profile.AGGRESSIVE: 0.32,
+# 05 §3 평시 상한 — vol(연변동성)·mdd(평시 최대낙폭, 음수)·var(연율 VaR95 양수손실).
+# R5: 초안정형 행 추가. 바인딩(차단)은 var(R5); vol·mdd는 게이트 참고.
+PROFILE_LIMITS: dict[Profile, dict[str, float]] = {
+    Profile.ULTRA_CONSERVATIVE: {"vol": 0.035, "mdd": -0.07, "var": 0.05},
+    Profile.CONSERVATIVE: {"vol": 0.06, "mdd": -0.10, "var": 0.08},
+    Profile.NEUTRAL: {"vol": 0.10, "mdd": -0.18, "var": 0.15},
+    Profile.GROWTH: {"vol": 0.15, "mdd": -0.28, "var": 0.22},
+    Profile.AGGRESSIVE: {"vol": 0.20, "mdd": -0.40, "var": 0.32},
 }
+VAR_LIMIT: dict[Profile, float] = {p: lim["var"] for p, lim in PROFILE_LIMITS.items()}
 _TOL = 1e-9
 
 

@@ -46,8 +46,24 @@ def _canonical_hash(result: PipelineResult) -> str:
     return hashlib.sha256(canon.encode("utf-8")).hexdigest()
 
 
-def run(answers: SurveyAnswers, currency: str = "KRW") -> PipelineResult:
-    """설문 → 리포트 E2E(스켈레톤). 강등 루프는 여기(pipeline)가 소유(08 §7)."""
+def run(
+    answers: SurveyAnswers, currency: str = "KRW", source: str = "synthetic"
+) -> PipelineResult:
+    """설문 → 리포트 E2E. 강등 루프는 여기(pipeline)가 소유(08 §7).
+
+    source='synthetic'(기본, M4 스켈레톤·오프라인) | 'real'(M5, 실 20년 스냅샷).
+    """
+    returns_fn = None
+    if source == "real":
+        from apex.allocation import MODEL_PORTFOLIOS
+        from apex.data import loader
+
+        universe = tuple(sorted({t for w in MODEL_PORTFOLIOS.values() for t in w}))
+        _mat = loader.load_returns_matrix(universe)  # 1회 로드, 루프 내 재사용
+
+        def returns_fn(w: dict[str, float]) -> object:
+            return loader.portfolio_returns_quarterly(_mat, w).to_numpy()
+
     profile: InvestorProfile = investor.score(answers)
     path: list[str] = []
     breaches: list[Breach] = []
@@ -59,7 +75,7 @@ def run(answers: SurveyAnswers, currency: str = "KRW") -> PipelineResult:
     # 재계산 루프: 위반 → 강등(revised_profile) 재배분. 사다리 유한 → 반드시 종료.
     for _ in range(6):  # 5구간 → 최대 4회 강등 + 여유
         alloc = allocation.build(profile.profile)
-        _bt, series = backtest.run(alloc, currency="USD")
+        _bt, series = backtest.run(alloc, currency="USD", returns_fn=returns_fn)
         rr = risk.report(series, alloc, display_currency=currency)
         dec = compliance.check(rr, profile)
         breaches.extend(dec.breaches)
@@ -99,6 +115,7 @@ def run(answers: SurveyAnswers, currency: str = "KRW") -> PipelineResult:
         risk=rr,
         breaches=breaches,
         explanation=explanation,
+        data_version="real-snapshot" if source == "real" else data.DATA_VERSION,
     )
     result.result_hash = _canonical_hash(result)
     return result

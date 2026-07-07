@@ -23,8 +23,10 @@ def _summarize(res: pipeline.PipelineResult) -> None:
     typer.echo(f"[재현성 해시] {res.result_hash[:16]}… · 데이터버전 {res.data_version}")
 
 
-def _run_and_write(answers: SurveyAnswers, currency: str, out: str) -> int:
-    res = pipeline.run(answers, currency=currency)
+def _run_and_write(
+    answers: SurveyAnswers, currency: str, out: str, source: str = "synthetic"
+) -> int:
+    res = pipeline.run(answers, currency=currency, source=source)
     _summarize(res)
     out_path = Path(out).with_suffix(".json")
     out_path.write_text(res.model_dump_json(indent=2), encoding="utf-8")
@@ -43,10 +45,51 @@ def run(
     input_path: str = typer.Option(..., "--input", help="설문 응답 JSON 경로 (06 §3.1)"),
     currency: str = typer.Option("krw", "--currency", help="표시 통화 krw|usd (기본 krw, D4)"),
     out: str = typer.Option("result.json", "--out", help="산출물 경로"),
+    real: bool = typer.Option(False, "--real", help="실 20년 스냅샷 사용(M5). 기본은 합성"),
 ) -> None:
-    """E2E(M4 스켈레톤): 설문→성향→배분→백테스트→리스크→컴플라이언스(강등 루프)→요약."""
+    """E2E: 설문→성향→배분→백테스트→리스크→컴플라이언스(강등 루프)→요약."""
     answers = SurveyAnswers(**json.loads(Path(input_path).read_text(encoding="utf-8")))
-    raise typer.Exit(code=_run_and_write(answers, currency.upper(), out))
+    src = "real" if real else "synthetic"
+    raise typer.Exit(code=_run_and_write(answers, currency.upper(), out, source=src))
+
+
+portfolio_app = typer.Typer(help="포트폴리오 (M5): 07§7 포트↔상한 사전검증 게이트")
+app.add_typer(portfolio_app, name="portfolio")
+
+
+@portfolio_app.command("gate")
+def portfolio_gate(
+    start: str = typer.Option("2005-01-01", "--start", help="백테스트 시작일"),
+) -> None:
+    """07§7 게이트: 5종 고정포트를 실 20년으로 백테스트해 평시 상한 통과 판정(M5 DoD)."""
+    from apex import gate
+
+    res = gate.run(start=start)
+    typer.echo(f"기간 {res['period'][0]}~{res['period'][1]} ({res['n_days']}일)\n")
+    typer.echo(
+        f"{'성향':8s} {'평시vol':>7s} {'평시MDD':>7s} {'평시VaR':>7s} {'상한':>5s} {'차단':>4s} "
+        f"{'CAGR':>6s}  스트레스(08/20/22)"
+    )
+    for r in res["rows"]:
+        mark = "OK" if r.passed else "FAIL"
+        st = "/".join(f"{r.stress[k] * 100:.0f}%" for k in ("2008", "2020", "2022"))
+        typer.echo(
+            f"{r.profile:8s} {r.vol * 100:6.1f}% {r.mdd_normal * 100:6.1f}% "
+            f"{r.var_annual * 100:6.1f}% {r.lim['var'] * 100:4.0f}% {mark:>4s} "
+            f"{r.cagr_full * 100:5.1f}%  {st}"
+        )
+    typer.echo("\n벤치마크:")
+    for name, b in res["benchmarks"].items():
+        if "error" in b:
+            typer.echo(f"  {name}: ERROR {b['error']}")
+        else:
+            typer.echo(
+                f"  {name:26s} CAGR {b['cagr'] * 100:5.1f}%  vol {b['vol'] * 100:4.1f}%  "
+                f"Sharpe {b['sharpe']:.2f}  MDD {b['mdd'] * 100:.0f}%"
+            )
+    all_pass = all(r.passed for r in res["rows"])
+    typer.echo(f"\n07§7 게이트 전원 통과(VaR 바인딩): {all_pass}")
+    raise typer.Exit(code=0 if all_pass else 1)
 
 
 data_app = typer.Typer(help="데이터 스냅샷 (M4/M4.5): raw 수집·content-hash 피닝·TR 대사")
