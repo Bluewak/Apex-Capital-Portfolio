@@ -1,0 +1,13 @@
+{
+  "q1_age": 62,
+  "q2_horizon": 3,
+  "q3_objective": "보전",
+  "q4_capital": 1,
+  "q5_monthly": 0,
+  "q6_max_loss": -0.05,
+  "q7_experience": "없음",
+  "q8_liquidity": "보통",
+  "q9_fx": "회피",
+  "q10_behavior": "매도",
+  "input_snapshot_id": "sample-retiree-001"
+}

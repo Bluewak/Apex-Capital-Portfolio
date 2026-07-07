@@ -24,27 +24,34 @@ class Breach(BaseModel):
 
 
 class RiskReport(BaseModel):
-    """리스크 지표. 통화별(현지·KRW) 2종을 각각 저장 (05 §0)."""
+    """리스크 지표 (05 §4 R3).
 
-    currency: str
+    바인딩(차단) 지표는 ``var95_annual`` — MDD가 아니다(R5, MDD -5%는 20년·무splice로 불가).
+    MVP는 ``calc_currency``(USD) 1세트 + KRW 표시 환산(이중 재계산·저장은 v2).
+    """
+
+    calc_currency: str = Field(default="USD", description="계산 기준 통화(현지, 05 §0)")
+    display_currency: str = Field(default="KRW")
     vol_annual: float
-    mdd: float = Field(le=0, description="최대낙폭, [-1,0]")
+    mdd: float = Field(le=0, description="평시 최대낙폭, [-1,0]")
     mdd_recovery_days: int | None = None
     var95_1d: float = Field(description="양수 손실률 표기")
     cvar95_1d: float = Field(description="양수 손실률 표기")
+    var95_annual: float = Field(description="연율 VaR95(평시)·양수손실률 — 컴플 바인딩(05 §3, R5)")
     sharpe: float
     calmar: float
-    fx_sensitivity_krw10: float | None = None
-    rate_sensitivity_100bp: float | None = None
+    currency_exposure: dict[str, float] = Field(
+        default_factory=dict, description="통화별 노출 비중(예: {'USD':0.92})"
+    )
     concentration: Concentration
-    stress: list[StressResult] = Field(default_factory=list)
+    stress: list[StressResult] = Field(
+        default_factory=list, description="disclosed 스트레스(차단 아님, R3)"
+    )
     breaches: list[Breach] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _cvar_ge_var(self) -> RiskReport:
         # 05 §5: 동일 α·보유기간에서 CVaR ≥ VaR
         if self.cvar95_1d < self.var95_1d:
-            raise ValueError(
-                f"CVaR({self.cvar95_1d}) < VaR({self.var95_1d}) — 05 §5 위반"
-            )
+            raise ValueError(f"CVaR({self.cvar95_1d}) < VaR({self.var95_1d}) — 05 §5 위반")
         return self

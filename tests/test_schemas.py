@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from apex.schemas import (
     Allocation,
     Concentration,
+    Constraints,
     InvestorProfile,
     Profile,
     RiskReport,
@@ -43,10 +44,12 @@ def test_survey_rejects_positive_max_loss():
 def test_investor_profile_and_model_portfolio():
     p = InvestorProfile(
         risk_score=62, profile="성장형", horizon_years=8, max_annual_loss=-0.20,
-        liquidity_need="낮음", fx_preference="일부허용", constraints=["현금 최소 5%"],
+        liquidity_need="낮음", fx_preference="일부허용",
+        constraints=Constraints(min_cash=0.05, hedge_preferred=False),
     )
     assert p.profile is Profile.GROWTH
     assert p.profile.model_portfolio == "MP-Growth"
+    assert p.constraints.min_cash == 0.05
 
 
 def test_investor_profile_score_out_of_range():
@@ -84,15 +87,16 @@ def test_allocation_rejects_negative_weight():
 def test_risk_report_cvar_ge_var():
     with pytest.raises(ValidationError):
         RiskReport(
-            currency="KRW", vol_annual=0.11, mdd=-0.17, var95_1d=0.03, cvar95_1d=0.02,
+            vol_annual=0.11, mdd=-0.17, var95_1d=0.03, cvar95_1d=0.02, var95_annual=0.14,
             sharpe=0.6, calmar=0.4, concentration=Concentration(max_asset_class=0.3, max_etf=0.3),
         )
 
 
 def test_risk_report_valid():
     r = RiskReport(
-        currency="KRW", vol_annual=0.11, mdd=-0.17, mdd_recovery_days=210,
-        var95_1d=0.018, cvar95_1d=0.026, sharpe=0.68, calmar=0.41,
+        vol_annual=0.11, mdd=-0.17, mdd_recovery_days=210,
+        var95_1d=0.018, cvar95_1d=0.026, var95_annual=0.141, sharpe=0.68, calmar=0.41,
         concentration=Concentration(max_asset_class=0.30, max_etf=0.30),
     )
     assert r.cvar95_1d >= r.var95_1d
+    assert r.calc_currency == "USD"
