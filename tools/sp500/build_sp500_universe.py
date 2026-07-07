@@ -481,7 +481,7 @@ def main():
         pass
 
     ap = argparse.ArgumentParser(description="S&P 500 N개년 합집합 → 테마 분류 HTML (07 §6)")
-    ap.add_argument("--years", type=int, default=5, help="합집합 기간(년), 기본 5")
+    ap.add_argument("--years", type=int, default=20, help="합집합 기간(년), 기본 20(백테스트 정합)")
     ap.add_argument("-o", "--output", default="sp500_by_sector.html", help="출력 HTML 경로")
     ap.add_argument("--no-enrich", action="store_true", help="편출종목 yfinance 보강 생략")
     args = ap.parse_args()
