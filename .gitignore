@@ -10,8 +10,10 @@ dist/
 .venv/
 venv/
 
-# 데이터 캐시 (재현성: 원자료는 버전태그로 별도 보관, 캐시는 커밋 안 함)
-data/
+# 데이터 캐시·산출 아티팩트 (재현성: raw 스냅샷은 content-hash 피닝, 커밋 안 함)
+# 루트 앵커(/) 필수 — 없으면 소스 패키지 src/apex/data/까지 무시됨
+/data/
+/artifacts/
 *.parquet
 *.feather
 

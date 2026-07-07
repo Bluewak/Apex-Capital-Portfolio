@@ -49,6 +49,35 @@ def run(
     raise typer.Exit(code=_run_and_write(answers, currency.upper(), out))
 
 
+data_app = typer.Typer(help="데이터 스냅샷 (M4/M4.5): raw 수집·content-hash 피닝·TR 대사")
+app.add_typer(data_app, name="data")
+
+
+@data_app.command("pull")
+def data_pull(
+    start: str = typer.Option("2005-01-01", "--start", help="수집 시작일"),
+    tol: float = typer.Option(0.0020, "--tol", help="대사 허용 연율 편차(기본 20bp)"),
+    no_pin: bool = typer.Option(False, "--no-pin", help="artifacts 피닝 생략"),
+) -> None:
+    """9슬롯+벤치마크 raw 수집 → 로컬 TR 재계산 → Adj Close와 대사(M4.5 DoD)."""
+    from apex.data import snapshot
+
+    res = snapshot.pull(start=start, tol_annual=tol, pin=not no_pin)
+    typer.echo(f"{'ticker':10s} {'rows':>6s} {'ann_dev':>10s} {'max_daily':>10s}  결과")
+    all_pass = True
+    for t, r in res.items():
+        rc = r.get("recon")
+        if rc is None:
+            typer.echo(f"{t:10s} {'EMPTY':>6s}")
+            all_pass = False
+            continue
+        mark = "OK" if rc.passed else "FAIL"
+        all_pass = all_pass and rc.passed
+        typer.echo(f"{t:10s} {r['rows']:6d} {rc.ann_dev:10.5f} {rc.max_daily_abs:10.5f}  {mark}")
+    typer.echo(f"\n대사 전원 통과: {all_pass}")
+    raise typer.Exit(code=0 if all_pass else 1)
+
+
 @app.command()
 def demo(
     case: str = typer.Option("retiree", "--case", help="retiree|aggressive|hold"),
