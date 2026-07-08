@@ -8,6 +8,8 @@
 """
 from __future__ import annotations
 
+from functools import lru_cache
+
 import numpy as np
 import pandas as pd
 
@@ -32,13 +34,18 @@ _TICKERS: dict[str, tuple[float, float, float]] = {
 _MARKET_MU, _MARKET_SIGMA = 0.03, 0.20
 
 
+@lru_cache(maxsize=4)
 def _market_returns(n_days: int) -> np.ndarray:
     rng = np.random.default_rng(_BASE_SEED)
     return rng.normal(_MARKET_MU / TRADING_DAYS, _MARKET_SIGMA / np.sqrt(TRADING_DAYS), n_days)
 
 
+@lru_cache(maxsize=64)
 def pinned_ticker_returns(ticker: str, n_days: int = N_DAYS) -> np.ndarray:
-    """결정론적 합성 일별 수익률(피닝 스냅샷 대역). 동일 티커 → 항상 동일 시계열."""
+    """결정론적 합성 일별 수익률(피닝 스냅샷 대역). 동일 티커 → 항상 동일 시계열.
+
+    결정론이라 캐시(재현성 유지). 호출자는 반환 배열을 변형하지 않는다(읽기 전용).
+    """
     beta, alpha, idio = _TICKERS[ticker]
     market = _market_returns(n_days)
     idx = sorted(_TICKERS).index(ticker)

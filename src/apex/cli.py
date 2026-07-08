@@ -28,9 +28,15 @@ def _run_and_write(
 ) -> int:
     res = pipeline.run(answers, currency=currency, source=source)
     _summarize(res)
-    out_path = Path(out).with_suffix(".json")
-    out_path.write_text(res.model_dump_json(indent=2), encoding="utf-8")
-    typer.echo(f"산출물(JSON): {out_path}")
+    out_path = Path(out)
+    if out_path.suffix.lower() == ".html":
+        from apex import report
+
+        out_path.write_text(report.render(res, answers), encoding="utf-8")
+    else:
+        out_path = out_path.with_suffix(".json")
+        out_path.write_text(res.model_dump_json(indent=2), encoding="utf-8")
+    typer.echo(f"산출물: {out_path}")
     return 0 if res.decision == "ok" else 2  # hold=2 (null-allocation exit code, 08 §7)
 
 
@@ -44,7 +50,7 @@ def version() -> None:
 def run(
     input_path: str = typer.Option(..., "--input", help="설문 응답 JSON 경로 (06 §3.1)"),
     currency: str = typer.Option("krw", "--currency", help="표시 통화 krw|usd (기본 krw, D4)"),
-    out: str = typer.Option("result.json", "--out", help="산출물 경로"),
+    out: str = typer.Option("report.html", "--out", help="산출물 경로(.html→리포트, 그 외→JSON)"),
     real: bool = typer.Option(False, "--real", help="실 20년 스냅샷 사용(M5). 기본은 합성"),
 ) -> None:
     """E2E: 설문→성향→배분→백테스트→리스크→컴플라이언스(강등 루프)→요약."""

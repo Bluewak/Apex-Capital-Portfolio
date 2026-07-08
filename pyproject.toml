@@ -42,6 +42,8 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.ruff.lint.per-file-ignores]
 # tools/sp500는 독립 유틸: HTML/CSS f-string·한글 매핑 dict의 긴 줄은 예외
 "tools/**" = ["E501"]
+# report는 HTML/CSS 템플릿 문자열: 긴 줄 예외
+"src/apex/report/__init__.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

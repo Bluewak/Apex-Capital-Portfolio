@@ -10,8 +10,15 @@ import json
 
 from pydantic import BaseModel, Field
 
-from apex import allocation, backtest, compliance, data, investor, risk
-from apex.schemas import Allocation, Breach, InvestorProfile, RiskReport, SurveyAnswers
+from apex import allocation, backtest, compliance, data, investor, ips, risk
+from apex.schemas import (
+    Allocation,
+    Breach,
+    InvestorProfile,
+    IPSDocument,
+    RiskReport,
+    SurveyAnswers,
+)
 
 
 class PipelineResult(BaseModel):
@@ -23,6 +30,8 @@ class PipelineResult(BaseModel):
     downgrade_path: list[str] = Field(default_factory=list)
     allocation: Allocation | None = None
     risk: RiskReport | None = None
+    ips: IPSDocument | None = None
+    expected_cagr: float | None = None
     breaches: list[Breach] = Field(default_factory=list)
     explanation: str
     data_version: str = data.DATA_VERSION
@@ -92,7 +101,10 @@ def run(
         path.append(dec.downgrade_reason or f"{profile.profile.value} 강등")
         profile = dec.revised_profile  # type: ignore[assignment]
 
+    ips_doc: IPSDocument | None = None
+    exp_cagr: float | None = None
     if decision == "ok" and alloc is not None and rr is not None:
+        exp_cagr = _bt.cagr
         top = sorted(alloc.weights.items(), key=lambda kv: -kv[1])[:3]
         top_s = " · ".join(f"{t} {w:.0%}" for t, w in top)
         explanation = (
@@ -100,6 +112,7 @@ def run(
             f"{_bt.cagr:.1%}, 평시 MDD {rr.mdd:.1%}, 연율 VaR95 {rr.var95_annual:.1%}. "
             "개별 투자권유 아님(교육·분석용)."
         )
+        ips_doc = ips.render(profile, alloc, answers, rr, _bt.cagr)
     else:
         explanation = (
             "배정 보류 — 감내 한도에 맞는 예시 배분이 없습니다. 원금보전형(예금·MMF)을 "
@@ -113,6 +126,8 @@ def run(
         downgrade_path=path,
         allocation=alloc,
         risk=rr,
+        ips=ips_doc,
+        expected_cagr=exp_cagr,
         breaches=breaches,
         explanation=explanation,
         data_version="real-snapshot" if source == "real" else data.DATA_VERSION,
