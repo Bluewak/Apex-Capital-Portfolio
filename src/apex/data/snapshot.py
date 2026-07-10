@@ -15,10 +15,8 @@ import numpy as np
 import pandas as pd
 
 from apex.data.adjust import ReconResult, local_tr_returns, reconcile, returns_from_adjclose
+from apex.universe import BENCHMARKS, CORE_SLOTS
 
-# 코어 9슬롯 + 벤치마크(KOSPI200 원화 TR 프록시) — 08 §3
-CORE_SLOTS = ("SPY", "QQQ", "EFA", "EEM", "IEF", "TLT", "AGG", "SHY", "GLD")
-BENCHMARKS = ("069500.KS",)  # KODEX200
 RAW_COLS = ("Open", "High", "Low", "Close", "Volume", "Dividends", "Stock Splits")
 ARTIFACTS = Path("artifacts/snapshots")
 

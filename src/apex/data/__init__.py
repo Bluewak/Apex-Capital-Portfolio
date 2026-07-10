@@ -13,9 +13,10 @@ from functools import lru_cache
 import numpy as np
 import pandas as pd
 
+from apex.metrics import TRADING_DAYS
+
 DATA_VERSION = "synthetic-v1"
 N_DAYS = 5040  # ≈ 20년 (252 × 20)
-TRADING_DAYS = 252
 _BASE_SEED = 20260707  # 리터럴 시드(플랫폼·시간 무관) — 결정론 보장
 
 # 티커별 (시장베타, 알파_연율, idio_연율). 통상 범위 손추정(M5 실측 전).

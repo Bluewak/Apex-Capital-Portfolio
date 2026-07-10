@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from html import escape
 
+from apex.universe import ASSET_CLASS, CLASS_COLOR, CLASS_LABEL
+
 # 용어집 (툴팁, R4 이해도 레이어)
 _GLOSSARY = {
     "SAA": "Strategic Asset Allocation · 장기 기준 배분 비율",
@@ -15,12 +17,6 @@ _GLOSSARY = {
     "CAGR": "연복리 수익률",
     "평시": "위기 3구간(2008·2020·2022)을 제외한 정상 시장 기준",
 }
-_CLASS = {
-    "SPY": ("주식", "#1f6f78"), "QQQ": ("주식", "#1f6f78"), "EFA": ("주식", "#1f6f78"),
-    "EEM": ("주식", "#1f6f78"), "IEF": ("채권", "#5a8f7a"), "TLT": ("채권", "#5a8f7a"),
-    "AGG": ("채권", "#5a8f7a"), "GLD": ("금", "#b5892f"), "SHY": ("현금성", "#7f8a99"),
-}
-
 _CSS = """
 :root{--bg:#eef1f4;--card:#fff;--ink:#16202f;--muted:#586576;--line:#d9e0e8;--accent:#0e5a63;
 --good:#2c7a5b;--warn:#a3641b;--hold:#a2413a;--soft:#0e5a6314}
@@ -70,17 +66,15 @@ def _term(t: str) -> str:
 
 
 def _alloc_bar(weights: dict[str, float]) -> str:
-    by: dict[str, tuple[float, str]] = {}
+    by: dict[str, float] = {}
     for tk, w in weights.items():
-        cls, color = _CLASS[tk]
-        cur = by.get(cls, (0.0, color))
-        by[cls] = (cur[0] + w, color)
+        by[ASSET_CLASS[tk]] = by.get(ASSET_CLASS[tk], 0.0) + w
     segs = "".join(
-        f'<span style="flex:{w:.4f};background:{c}">{cls} {w:.0%}</span>'
-        for cls, (w, c) in sorted(by.items(), key=lambda kv: -kv[1][0])
+        f'<span style="flex:{w:.4f};background:{CLASS_COLOR[code]}">{CLASS_LABEL[code]} {w:.0%}</span>'
+        for code, w in sorted(by.items(), key=lambda kv: -kv[1])
     )
     legend = " ".join(
-        f'<span><i style="background:{_CLASS[tk][1]}"></i>{escape(tk)} {w:.0%}</span>'
+        f'<span><i style="background:{CLASS_COLOR[ASSET_CLASS[tk]]}"></i>{escape(tk)} {w:.0%}</span>'
         for tk, w in sorted(weights.items(), key=lambda kv: -kv[1])
     )
     return f'<div class="bar">{segs}</div><div class="leg">{legend}</div>'

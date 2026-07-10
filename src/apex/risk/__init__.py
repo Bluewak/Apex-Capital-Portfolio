@@ -11,13 +11,7 @@ import pandas as pd
 from apex import data, metrics
 from apex.scenarios import STRESS_WINDOWS, normal_mask, window_drawdown
 from apex.schemas import Allocation, Concentration, RiskReport, StressResult
-
-# 티커 → 대분류 (집중도용, 07 §1)
-_ASSET_CLASS = {
-    "SPY": "EQ", "QQQ": "EQ", "EFA": "EQ", "EEM": "EQ",
-    "IEF": "BOND", "TLT": "BOND", "AGG": "BOND",
-    "SHY": "CASH", "GLD": "GOLD",
-}
+from apex.universe import ASSET_CLASS
 
 
 def report(
@@ -47,7 +41,7 @@ def report(
 
     by_class: dict[str, float] = {}
     for t, w in alloc.weights.items():
-        by_class[_ASSET_CLASS[t]] = by_class.get(_ASSET_CLASS[t], 0.0) + w
+        by_class[ASSET_CLASS[t]] = by_class.get(ASSET_CLASS[t], 0.0) + w
 
     return RiskReport(
         calc_currency=series.attrs["currency"],
