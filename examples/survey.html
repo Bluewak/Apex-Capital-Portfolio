@@ -12,6 +12,7 @@
   h1{font-size:25px;margin:.3em 0 .3em;letter-spacing:-.02em}
   .sub{color:var(--muted);font-size:14px;margin:0 0 8px}
   .disclaimer{background:var(--soft);border:1px solid color-mix(in srgb,var(--accent) 26%,transparent);border-radius:10px;padding:11px 14px;font-size:12.5px;margin:14px 0 20px}
+  .reelicit{background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:12px;padding:14px 16px;margin-top:14px}
   .q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
   .q label{display:block;font-weight:600;font-size:14px;margin-bottom:8px}
   .q .hint{font-weight:400;color:var(--muted);font-size:12.5px}
@@ -54,6 +55,12 @@
     <div class="row"><button type="submit">answers.json 만들기</button></div>
   </form>
 
+  <div class="reelicit" id="reelicit" style="display:none">
+    <b>먼저 확인해 주세요 · 재보정</b>
+    <p style="margin:8px 0;font-size:13.5px">‘거의 무손실(−5%)’과 ‘물가+α(증식·균형)’는 동시에 갖기 어렵습니다. 예금은 명목 손실이 거의 없지만 10년 물가를 반영하면 실질 구매력이 줄어듭니다(그것도 손실). 물가+α를 원하면 6년에 한 번쯤 −10% 안팎 변동을 받아들여야 합니다. 어느 쪽이 더 중요하신가요?</p>
+    <div class="row"><button type="button" id="re-safe">무손실이 우선 (→ 보전)</button><button type="button" class="ghost" id="re-grow">물가+α가 우선 (그대로 진행)</button></div>
+  </div>
+
   <div class="out" id="out">
     <pre id="json"></pre>
     <div class="row"><button class="ghost" id="copy">복사</button><button class="ghost" id="dl">다운로드</button></div>
@@ -82,12 +89,26 @@
     return o;
   }
   let last = '';
-  f.addEventListener('submit', e => {
-    e.preventDefault();
+  function contradiction(){
+    return +q6_max_loss.value >= -0.05 && (q3_objective.value === '증식' || q3_objective.value === '균형');
+  }
+  function generate(){
     last = JSON.stringify(build(), null, 2);
     document.getElementById('json').textContent = last;
+    document.getElementById('reelicit').style.display = 'none';
     document.getElementById('out').style.display = 'block';
+  }
+  f.addEventListener('submit', e => {
+    e.preventDefault();
+    // 재보정 관문(R5): 모순 주문이면 먼저 재질문
+    if (contradiction() && document.getElementById('reelicit').style.display === 'none') {
+      document.getElementById('reelicit').style.display = 'block';
+      return;
+    }
+    generate();
   });
+  document.getElementById('re-safe').addEventListener('click', () => { q3_objective.value = '보전'; generate(); });
+  document.getElementById('re-grow').addEventListener('click', () => generate());
   document.getElementById('copy').addEventListener('click', () => navigator.clipboard && navigator.clipboard.writeText(last));
   document.getElementById('dl').addEventListener('click', () => {
     const b = new Blob([last], {type:'application/json'});

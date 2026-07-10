@@ -67,6 +67,24 @@ def _q6_cap(q6: float) -> Profile | None:
     return None
 
 
+def reelicitation_note(answers: SurveyAnswers) -> str | None:
+    """모순 주문(무손실 지향 ∧ 물가+α 증식) 감지 → 재보정 문구 (R5, 08 §10·03 §4).
+
+    Q6=−5%(사실상 무손실)인데 목적이 증식/균형이면 '무손실 + 물가+α'는 동시 불가.
+    hold/발행 이전에 결과 결합형 재질문 + 인플레이션을 '손실'로 재프레이밍한다.
+    교육(트레이드오프)이지 개인 지시 아님.
+    """
+    if answers.q6_max_loss >= -0.05 and answers.q3_objective in {"증식", "균형"}:
+        return (
+            "'거의 무손실(−5%)'과 '물가+α'는 동시에 갖기 어렵습니다. 예금은 명목 손실이 "
+            "거의 없지만 10년 물가를 반영하면 실질 구매력이 줄어듭니다(그것도 손실입니다). "
+            "물가+α를 원하시면 6년에 한 번쯤 −10% 안팎의 변동을 받아들여야 합니다. "
+            "어느 쪽이 더 중요하십니까? — 무손실 우선이면 예금·초안정형, 물가+α 우선이면 "
+            "감내 한도를 다시 확인해 주세요(교육 정보, 개인 지시 아님)."
+        )
+    return None
+
+
 def score(answers: SurveyAnswers) -> InvestorProfile:
     """설문 → InvestorProfile. 점수 산출 후 Q6 하드 캡을 적용(더 보수적으로만)."""
     rs = _score(answers)

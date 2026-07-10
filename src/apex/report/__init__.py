@@ -107,6 +107,13 @@ def _body(result, answers) -> str:
     prof = escape(result.final_profile)
     parts: list[str] = []
 
+    # 재보정 관문 (모순 주문, R5) — 발행/보류에 앞서 먼저 고지
+    if result.reelicitation:
+        parts.append(
+            f'<div class="callout c-warn"><span class="lab">먼저 확인해 주세요 · 재보정</span>'
+            f"{escape(result.reelicitation)}</div>"
+        )
+
     # 강등 사유 렌더 (downgrade, R4 CS 티켓5)
     if result.downgrade_path and result.decision == "ok":
         steps = "".join(f"<li>{escape(s)}</li>" for s in result.downgrade_path)
@@ -142,6 +149,16 @@ def _body(result, answers) -> str:
         f'<div class="v">{r.var95_annual:.1%}</div></div></div>'
     )
     parts.append(_stress_block(r))
+    # 환효과 분리 표기 (환회피 응답 기본, R4 행동재무 갭2)
+    if answers.q9_fx == "회피":
+        usd = r.currency_exposure.get("USD", 1.0)
+        parts.append(
+            f'<div class="callout c-disc"><span class="lab">환효과 분리 · 환회피 응답 반영</span>'
+            f"원화 표시 수익 = <b>자산손익 + 환손익</b>입니다. 이 배분은 USD 노출 약 {usd:.0%}라 "
+            f"원화 기준 손익의 상당 부분이 환율에 좌우됩니다(원화 강세 시 손실 확대). "
+            f"MVP는 환헤지를 제공하지 않아, 환회피 응답을 이 분리 고지로 반영합니다."
+            f"</div>"
+        )
     if result.ips is not None:
         parts.append(f'<div class="card"><h2>투자정책서(IPS) · 예시</h2>'
                      f'<div class="ips">{escape(result.ips.rendered_text)}</div></div>')

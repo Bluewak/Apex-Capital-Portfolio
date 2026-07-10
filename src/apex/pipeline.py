@@ -33,6 +33,7 @@ class PipelineResult(BaseModel):
     ips: IPSDocument | None = None
     expected_cagr: float | None = None
     breaches: list[Breach] = Field(default_factory=list)
+    reelicitation: str | None = None  # 모순 주문 재보정 문구(R5)
     explanation: str
     data_version: str = data.DATA_VERSION
     result_hash: str = ""
@@ -129,6 +130,7 @@ def run(
         ips=ips_doc,
         expected_cagr=exp_cagr,
         breaches=breaches,
+        reelicitation=investor.reelicitation_note(answers),
         explanation=explanation,
         data_version="real-snapshot" if source == "real" else data.DATA_VERSION,
     )

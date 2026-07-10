@@ -50,6 +50,25 @@ def test_report_hold_no_personalized_portfolio():
     assert "SHY 65%" not in html  # 개인화 배분 바 없음
 
 
+def test_reelicitation_on_contradiction():
+    """무손실(−5%) ∧ 증식 = 모순 주문 → 재보정 문구 + 리포트 콜아웃(R5)."""
+    ans = _survey(q6_max_loss=-0.05, q3_objective="증식")
+    res = pipeline.run(ans)
+    assert res.reelicitation is not None and "물가" in res.reelicitation
+    assert "재보정" in report.render(res, ans)
+
+
+def test_no_reelicitation_when_consistent():
+    res = pipeline.run(_survey(q6_max_loss=-0.05, q3_objective="보전"))
+    assert res.reelicitation is None
+
+
+def test_fx_separation_note_for_averse():
+    """환회피(Q9=회피) → 환효과 분리 고지(R4)."""
+    res = pipeline.run(_retiree())  # Q9=회피
+    assert "환효과 분리" in report.render(res, _retiree())
+
+
 def test_report_downgrade_reason_rendered():
     res = pipeline.run(_survey(q1_age=29, q2_horizon=5, q3_objective="증식",
                                q6_max_loss=-0.15, q7_experience="많음", q10_behavior="추가매수"))
