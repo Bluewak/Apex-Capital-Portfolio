@@ -7,6 +7,7 @@ from pathlib import Path
 import typer
 
 from apex import __version__, pipeline
+from apex import currency as ccy
 from apex.schemas import SurveyAnswers
 
 app = typer.Typer(
@@ -56,7 +57,7 @@ def run(
     """E2E: 설문→성향→배분→백테스트→리스크→컴플라이언스(강등 루프)→요약."""
     answers = SurveyAnswers(**json.loads(Path(input_path).read_text(encoding="utf-8")))
     src = "real" if real else "synthetic"
-    raise typer.Exit(code=_run_and_write(answers, currency.upper(), out, source=src))
+    raise typer.Exit(code=_run_and_write(answers, ccy.normalize(currency), out, source=src))
 
 
 portfolio_app = typer.Typer(help="포트폴리오 (M5): 07§7 포트↔상한 사전검증 게이트")
