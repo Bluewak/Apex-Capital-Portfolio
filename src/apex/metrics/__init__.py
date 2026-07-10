@@ -9,8 +9,17 @@ import numpy as np
 TRADING_DAYS = 252
 
 
+def _require(returns: np.ndarray, min_n: int = 1) -> np.ndarray:
+    """빈/과소 표본 방어(좁은 기간·전구간 스트레스 마스킹 등에서 크래시 예방)."""
+    arr = np.asarray(returns, dtype=float)
+    if arr.size < min_n:
+        raise ValueError(f"수익률 표본 부족: {arr.size} < {min_n}")
+    return arr
+
+
 def cagr(returns: np.ndarray, ppy: int = TRADING_DAYS) -> float:
     """연복리수익률."""
+    returns = _require(returns, 1)
     cum = float(np.prod(1.0 + returns))
     years = len(returns) / ppy
     if years <= 0 or cum <= 0:
@@ -25,11 +34,13 @@ def cumulative(returns: np.ndarray) -> float:
 
 def vol_annual(returns: np.ndarray, ppy: int = TRADING_DAYS) -> float:
     """일별 수익률 표준편차의 연율화 (05 §1.1)."""
+    returns = _require(returns, 2)
     return float(np.std(returns, ddof=1) * np.sqrt(ppy))
 
 
 def mdd(returns: np.ndarray) -> float:
     """최대낙폭 (05 §1.2). 음수."""
+    returns = _require(returns, 1)
     cum = np.cumprod(1.0 + returns)
     peak = np.maximum.accumulate(cum)
     dd = cum / peak - 1.0
@@ -38,11 +49,13 @@ def mdd(returns: np.ndarray) -> float:
 
 def var95_1d(returns: np.ndarray) -> float:
     """1일 Historical VaR95, 양수 손실률 (05 §1.3)."""
+    returns = _require(returns, 1)
     return float(-np.quantile(returns, 0.05))
 
 
 def cvar95_1d(returns: np.ndarray) -> float:
     """1일 Historical CVaR95, 양수 손실률 (05 §1.4)."""
+    returns = _require(returns, 1)
     q = np.quantile(returns, 0.05)
     tail = returns[returns <= q]
     return float(-tail.mean()) if tail.size else var95_1d(returns)
@@ -53,6 +66,7 @@ def var95_annual(returns: np.ndarray, window: int = TRADING_DAYS) -> float:
 
     컴플라이언스 바인딩 지표(R5). 정규가정 없이 실측 분포만 사용.
     """
+    returns = _require(returns, 1)
     if len(returns) <= window:
         # 데이터 부족 시 √기간 스케일 폴백(스켈레톤 한정, 실운영은 20년 확보로 미발생)
         return float(-np.quantile(returns, 0.05) * np.sqrt(window))

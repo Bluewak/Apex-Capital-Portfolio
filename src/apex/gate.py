@@ -49,13 +49,19 @@ def _universe() -> tuple[str, ...]:
     return tuple(sorted({t for w in MODEL_PORTFOLIOS.values() for t in w}))
 
 
-def _bench_stats(ret: np.ndarray) -> dict[str, float]:
+def _bench_stats(ret: np.ndarray, rf_annual: float = 0.02) -> dict[str, float]:
+    """벤치마크 통계. Sharpe 무위험은 **계산통화별**(USD 3M / KRW CD 근사, 08 §3·§6)."""
     return {
         "cagr": metrics.cagr(ret),
         "vol": metrics.vol_annual(ret),
-        "sharpe": metrics.sharpe(ret),
+        "sharpe": metrics.sharpe(ret, rf_annual=rf_annual),
         "mdd": metrics.mdd(ret),
     }
+
+
+# 통화별 무위험이자 근사 (Sharpe용). 실 소싱은 M5 정밀화(DGS3MO / ECOS CD).
+_RF_USD = 0.02
+_RF_KRW = 0.025
 
 
 def run(start: str = "2005-01-01", end: str | None = None) -> dict:
@@ -88,7 +94,8 @@ def run(start: str = "2005-01-01", end: str | None = None) -> dict:
     }
     try:
         kospi = loader.load_ticker_returns(_KOSPI, start, end)
-        benchmarks["KOSPI200 (KODEX200, KRW)"] = _bench_stats(kospi.to_numpy())
+        # KRW 시계열이므로 KRW CD 근사 무위험 사용(USD rf로 계산 시 왜곡, R3 퀀트)
+        benchmarks["KOSPI200 (KODEX200, KRW)"] = _bench_stats(kospi.to_numpy(), rf_annual=_RF_KRW)
     except Exception as e:  # noqa: BLE001 — 벤치마크 소싱 실패는 게이트 중단 아님
         benchmarks["KOSPI200 (KODEX200, KRW)"] = {"error": str(e)[:50]}
 

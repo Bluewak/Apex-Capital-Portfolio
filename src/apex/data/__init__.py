@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 from apex.metrics import TRADING_DAYS
+from apex.universe import CORE_SLOTS
 
 DATA_VERSION = "synthetic-v1"
 N_DAYS = 5040  # ≈ 20년 (252 × 20)
@@ -32,13 +33,16 @@ _TICKERS: dict[str, tuple[float, float, float]] = {
     "SHY": (0.00, 0.010, 0.012),
     "GLD": (0.10, 0.020, 0.14),
 }
+assert set(_TICKERS) == set(CORE_SLOTS), "합성 파라미터 티커가 universe.CORE_SLOTS와 불일치"
 _MARKET_MU, _MARKET_SIGMA = 0.03, 0.20
 
 
 @lru_cache(maxsize=4)
 def _market_returns(n_days: int) -> np.ndarray:
     rng = np.random.default_rng(_BASE_SEED)
-    return rng.normal(_MARKET_MU / TRADING_DAYS, _MARKET_SIGMA / np.sqrt(TRADING_DAYS), n_days)
+    arr = rng.normal(_MARKET_MU / TRADING_DAYS, _MARKET_SIGMA / np.sqrt(TRADING_DAYS), n_days)
+    arr.setflags(write=False)  # 캐시 오염 방지(호출자 in-place 변형 차단)
+    return arr
 
 
 @lru_cache(maxsize=64)
@@ -52,7 +56,9 @@ def pinned_ticker_returns(ticker: str, n_days: int = N_DAYS) -> np.ndarray:
     idx = sorted(_TICKERS).index(ticker)
     rng = np.random.default_rng(_BASE_SEED + 1 + idx)
     noise = rng.normal(0.0, idio / np.sqrt(TRADING_DAYS), n_days)
-    return alpha / TRADING_DAYS + beta * market + noise
+    out = alpha / TRADING_DAYS + beta * market + noise
+    out.setflags(write=False)  # 캐시 오염 방지
+    return out
 
 
 def portfolio_returns(weights: dict[str, float], n_days: int = N_DAYS) -> np.ndarray:

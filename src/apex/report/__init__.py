@@ -161,7 +161,7 @@ def _body(result, answers) -> str:
 
 def render(result, answers) -> str:
     """PipelineResult → 자립형 HTML 리포트 문자열."""
-    chip = {"ok": "ok", "downgrade": "warn", "hold": "hold"}.get(result.decision, "ok")
+    chip = {"ok": "ok", "hold": "hold"}.get(result.decision, "ok")  # 최종 decision=ok|hold
     return f"""<!DOCTYPE html>
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">

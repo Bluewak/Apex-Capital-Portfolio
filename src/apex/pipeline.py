@@ -39,8 +39,12 @@ class PipelineResult(BaseModel):
     result_hash: str = ""
 
 
-def _round_floats(obj, ndigits: int = 9):
-    """산출물 정규화 — 부동소수를 고정 자릿수로(재현성 해시 안정화, 08 §6)."""
+def _round_floats(obj, ndigits: int = 6):
+    """산출물 정규화 — 부동소수를 고정 자릿수로(재현성 해시 안정화, 08 §6).
+
+    6자리 = rtol≈1e-6 의도와 정합(ULP 차이엔 견고). 크로스머신 엄밀 검증은
+    수치필드 rtol 비교 권장(08 §6, v2 정밀화).
+    """
     if isinstance(obj, float):
         return round(obj, ndigits)
     if isinstance(obj, dict):
