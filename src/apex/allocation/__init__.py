@@ -34,12 +34,21 @@ MODEL_PORTFOLIOS: dict[Profile, dict[str, float]] = {
 }
 
 
-def build(profile: Profile, as_of: date | None = None) -> Allocation:
-    """성향 → Allocation(티커·비중). 몰개성 유형 예시(R5, 개인화 아님)."""
-    weights = MODEL_PORTFOLIOS[profile]
+def build(profile: Profile, min_cash: float = 0.0, as_of: date | None = None) -> Allocation:
+    """성향 → Allocation(티커·비중). 몰개성 유형 예시(R5, 개인화 아님).
+
+    ``min_cash``: 현금성(SHY) 최소 비중(03 §4 Q8='높음' → ≥10%). 부족 시 SHY를
+    끌어올리고 나머지를 비례 축소(합=1 유지). 하드 가드레일 실반영.
+    """
+    w = dict(MODEL_PORTFOLIOS[profile])
+    w.setdefault("SHY", 0.0)
+    if w["SHY"] < min_cash - 1e-9:
+        others_sum = sum(v for k, v in w.items() if k != "SHY")
+        scale = (1.0 - min_cash) / others_sum if others_sum > 0 else 0.0
+        w = {k: (min_cash if k == "SHY" else v * scale) for k, v in w.items()}
     return Allocation(
         profile=profile.value,
         model_portfolio=profile.model_portfolio,
-        weights=dict(weights),
+        weights=w,
         as_of=as_of or date(2026, 7, 7),
     )

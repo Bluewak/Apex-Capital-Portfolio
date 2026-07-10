@@ -64,12 +64,15 @@ def run(
     source='synthetic'(기본, M4 스켈레톤·오프라인) | 'real'(M5, 실 20년 스냅샷).
     """
     returns_fn = None
+    data_version = data.DATA_VERSION
     if source == "real":
         from apex.allocation import MODEL_PORTFOLIOS
         from apex.data import loader
 
         universe = tuple(sorted({t for w in MODEL_PORTFOLIOS.values() for t in w}))
         _mat = loader.load_returns_matrix(universe)  # 1회 로드, 루프 내 재사용
+        # 실 스냅샷 content-hash → data_version(재실행 변동 대면 고지, §9)
+        data_version = "real-" + hashlib.sha256(_mat.to_numpy().tobytes()).hexdigest()[:12]
 
         def returns_fn(w: dict[str, float]) -> object:
             return loader.portfolio_returns_quarterly(_mat, w, cost_bps=loader.DEFAULT_COST_BPS)
@@ -84,7 +87,7 @@ def run(
 
     # 재계산 루프: 위반 → 강등(revised_profile) 재배분. 사다리 유한 → 반드시 종료.
     for _ in range(6):  # 5구간 → 최대 4회 강등 + 여유
-        alloc = allocation.build(profile.profile)
+        alloc = allocation.build(profile.profile, min_cash=profile.constraints.min_cash)
         _bt, series = backtest.run(alloc, currency="USD", returns_fn=returns_fn)
         rr = risk.report(series, alloc, display_currency=currency, normal_only=(source == "real"))
         dec = compliance.check(rr, profile)
@@ -115,6 +118,7 @@ def run(
         )
         ips_doc = ips.render(profile, alloc, answers, rr, _bt.cagr)
     else:
+        alloc, rr = None, None  # 방어: 미종료/hold 시 포트 미노출(대체 포트 0건, R5)
         explanation = (
             "배정 보류 — 감내 한도에 맞는 예시 배분이 없습니다. 원금보전형(예금·MMF)을 "
             "참고하시고, 감내 한도를 다시 확인해 보세요(교육용, 개인 지시 아님)."
@@ -132,7 +136,7 @@ def run(
         breaches=breaches,
         reelicitation=investor.reelicitation_note(answers),
         explanation=explanation,
-        data_version="real-snapshot" if source == "real" else data.DATA_VERSION,
+        data_version=data_version,
     )
     result.result_hash = _canonical_hash(result)
     return result
