@@ -209,6 +209,28 @@ def data_rates(
     typer.echo(f"rates_version {r['rates_version']}")
 
 
+@data_app.command("golden")
+def data_golden(
+    start: str = typer.Option("2010-01-01", "--start", help="대사 시작일"),
+    no_pin: bool = typer.Option(False, "--no-pin", help="artifacts 피닝 생략"),
+) -> None:
+    """골든 대사(§3.1): 독립 계보(FDR Naver/KRX·2nd-vendor)와 가격피드 대조 → 자기참조 탈출."""
+    from apex.data import golden
+
+    res = golden.pull_golden(start=start, pin=not no_pin)
+    typer.echo(f"golden_version {res['golden_version']}")
+    typer.echo(f"{'ticker':10s} {'ann_dev':>8s} {'통과':>5s}  계보")
+    for r in res["rows"]:
+        if "error" in r:
+            typer.echo(f"{r['ticker']:10s}     ERROR")
+            continue
+        typer.echo(
+            f"{r['ticker']:10s} {r['ann_dev'] * 100:7.2f}% {str(r['passed']):>5s}  {r['lineage']}"
+        )
+    n_pass = sum(1 for r in res["rows"] if r.get("passed"))
+    typer.echo(f"\n독립 대사 통과 {n_pass}/{len(res['rows'])}")
+
+
 model_app = typer.Typer(help="Model Plane (M-v2): CMA→Optimizer 사전연산 레지스트리")
 app.add_typer(model_app, name="model")
 

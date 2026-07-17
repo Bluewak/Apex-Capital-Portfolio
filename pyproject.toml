@@ -13,6 +13,7 @@ dependencies = [
     "pandas-datareader>=0.10",  # FRED(환율·금리), Stooq 폴백 (D7)
     "jinja2>=3.1",          # 04 §2 리포트 렌더
     "typer>=0.12",          # CLI (프론트 = 명령줄)
+    "finance-datareader>=0.9.202",
 ]
 
 [project.scripts]
