@@ -40,6 +40,41 @@ def content_hash(df: pd.DataFrame) -> str:
     return hashlib.sha256(buf.encode("utf-8")).hexdigest()
 
 
+def _pin_path(ticker: str) -> Path:
+    return ARTIFACTS / f"{ticker.replace('.', '_')}.csv"
+
+
+def load_pinned(ticker: str) -> pd.DataFrame:
+    """피닝된 raw 스냅샷 CSV 로드 (v2 §3.1 핀 우선 서빙).
+
+    런타임은 **피닝 스냅샷만** 읽는다. 핀 부재 시 하드 실패(암묵 재수집 금지) —
+    라이브 fetch는 ``apex data pull``에서만. 인덱스는 로컬 거래일(tz-naive,
+    ``tz_localize(None)`` 등가)로 복원해 스트레스 구간 판정과 정합.
+    """
+    path = _pin_path(ticker)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"핀 부재: {path} — 런타임은 피닝 스냅샷만 읽습니다(v2 §3.1). "
+            "먼저 `apex data pull`로 스냅샷을 생성하세요(암묵 재수집 금지)."
+        )
+    df = pd.read_csv(path)
+    # 저장 형식: 'YYYY-MM-DD HH:MM:SS±TZ' → 로컬 캘린더 날짜(앞 10자)만 취해 wall-clock 보존
+    idx = pd.to_datetime(df["Date"].astype(str).str.slice(0, 10))
+    df = df.drop(columns=["Date"]).set_index(idx)
+    df.index.name = "Date"
+    return df
+
+
+def pinned_data_version() -> str:
+    """피닝 매니페스트의 data_version(재실행·크로스머신 안정, §3.1·§6)."""
+    mf = ARTIFACTS / "manifest.json"
+    if not mf.exists():
+        raise FileNotFoundError(
+            f"핀 매니페스트 부재: {mf} — 먼저 `apex data pull`을 실행하세요."
+        )
+    return json.loads(mf.read_text(encoding="utf-8"))["data_version"]
+
+
 def _col(df: pd.DataFrame, name: str) -> np.ndarray | None:
     if name not in df.columns:
         return None

@@ -27,12 +27,33 @@ __all__ = [
 
 
 def load_ticker_returns(
-    ticker: str, start: str = "2005-01-01", end: str | None = None
+    ticker: str,
+    start: str = "2005-01-01",
+    end: str | None = None,
+    *,
+    source: str = "pinned",
 ) -> pd.Series:
-    """단일 티커 raw → 로컬 TR 일별 수익률 Series (tz-naive 날짜 인덱스)."""
-    df = snapshot.fetch_raw(ticker, start, end)
+    """단일 티커 raw → 로컬 TR 일별 수익률 Series (tz-naive 날짜 인덱스).
+
+    ``source='pinned'``(기본): 피닝 스냅샷만 소비(v2 §3.1, 핀 부재 시 하드 실패).
+    ``source='live'``: yfinance 재수집(``apex data pull`` 등 오프라인 배치 전용).
+    """
+    if source == "pinned":
+        df = snapshot.load_pinned(ticker)
+    else:
+        df = snapshot.fetch_raw(ticker, start, end)
     df = df.dropna(subset=["Close"])
     df = df[df["Close"] > 0]
+    # 핀은 전체 이력 → 요청 구간으로 필터(라이브는 fetch가 이미 구간 제한)
+    idx_all = pd.DatetimeIndex(df.index)
+    if idx_all.tz is not None:
+        idx_all = idx_all.tz_localize(None)
+    idx_all = idx_all.normalize()
+    df = df.set_index(idx_all)
+    if start:
+        df = df[df.index >= pd.Timestamp(start)]
+    if end:
+        df = df[df.index <= pd.Timestamp(end)]
     close = df["Close"].to_numpy(dtype=float)
 
     def _col(name: str) -> np.ndarray:
@@ -41,8 +62,7 @@ def load_ticker_returns(
     div = _col("Dividends")
     capg = _col("Capital Gains")
     ret = local_tr_returns(close, div, np.zeros(len(df)), capg)  # Close 분할조정 전제
-    idx = df.index[1:].tz_localize(None).normalize()
-    return pd.Series(ret, index=idx, name=ticker)
+    return pd.Series(ret, index=df.index[1:], name=ticker)
 
 
 def load_returns_matrix(

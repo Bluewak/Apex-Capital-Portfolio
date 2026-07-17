@@ -1,0 +1,44 @@
+name: ci
+
+# Step 0 핏함수 게이트 (v2 §8). 병합 차단:
+#  - lint(ruff) · 계약/유닛(pytest) · 결정론 경계(코어에 LLM import 금지)
+#  - 크로스프로세스 재현성(별도 2프로세스 numeric_hash 동일) · 성향 위반 0건(property)
+# BLAS 스레드 핀(OMP/MKL/OPENBLAS=1)을 잡 전역 env로 세팅 → 부동소수 비결정성 억제(§6).
+
+on:
+  push:
+    branches: [main, "scaffold/**", "step0/**", "v2/**"]
+  pull_request:
+    branches: [main]
+
+env:
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  PYTHONHASHSEED: "0"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sync deps
+        run: uv sync --all-extras --dev
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Determinism boundary (코어에 LLM import 금지)
+        run: uv run pytest tests/test_determinism_boundary.py -q
+
+      - name: Reproducibility (크로스프로세스 numeric_hash)
+        run: uv run pytest tests/test_reproducibility.py -q
+
+      - name: Full test suite (계약·property·원장·리포트)
+        run: uv run pytest -q

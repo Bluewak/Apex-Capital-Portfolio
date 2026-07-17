@@ -2,41 +2,99 @@
 
 M4 walking skeleton: 1 프로파일을 설문→배분→백테스트→리스크→컴플라이언스(강등 루프)
 → 문장 1줄 → 재현성 해시로 관통한다. 루프 종료(수렴/hold)와 재현성이 M4 DoD(08 §3).
+
+v2 §3.3·§7: 산출을 **결정론 코어(NumericResult, 해시 대상)** 와
+**자문 서술(Narrative, 해시 제외)** 로 물리 분리한다. ``numeric_hash``는 서술을
+포함하지 않으므로, 룰 템플릿을 LLM 서술로 교체해도 재현성 해시가 흔들리지 않는다.
+원장 쓰기는 이 모듈이 아니라 **서빙 계층(cli/service)** 소관 — ``run``은 순수(디스크 무접촉).
 """
 from __future__ import annotations
 
 import hashlib
 import json
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from apex import allocation, backtest, compliance, data, investor, ips, risk
+from apex.provenance import ENV_HASH, SCHEMA_VERSION
 from apex.schemas import (
     Allocation,
     Breach,
     InvestorProfile,
     IPSDocument,
+    Narrative,
+    NumericResult,
     RiskReport,
     SurveyAnswers,
 )
 
 
 class PipelineResult(BaseModel):
-    """apex run 산출물(스켈레톤). hold면 allocation/risk = None(포트 미발행, R5)."""
+    """apex run 산출물 = 결정론 코어(numeric, 해시 대상) + 자문 서술(narrative, 해시 제외).
 
-    decision: str  # "ok" | "hold"
-    final_profile: str
-    risk_score: int
-    downgrade_path: list[str] = Field(default_factory=list)
-    allocation: Allocation | None = None
-    risk: RiskReport | None = None
-    ips: IPSDocument | None = None
-    expected_cagr: float | None = None
-    breaches: list[Breach] = Field(default_factory=list)
-    reelicitation: str | None = None  # 모순 주문 재보정 문구(R5)
-    explanation: str
-    data_version: str = data.DATA_VERSION
-    result_hash: str = ""
+    하위호환 접근자(``decision``·``allocation``·``result_hash`` …)는 ``numeric``/``narrative``
+    로 위임한다 — report·cli·tests의 기존 속성 접근을 깨지 않기 위함.
+    """
+
+    numeric: NumericResult
+    narrative: Narrative = Narrative()
+    numeric_hash: str = ""
+    narrative_hash: str = ""
+
+    # --- 하위호환 접근자(결정론 코어) ---
+    @property
+    def decision(self) -> str:
+        return self.numeric.decision
+
+    @property
+    def final_profile(self) -> str:
+        return self.numeric.final_profile
+
+    @property
+    def risk_score(self) -> int:
+        return self.numeric.risk_score
+
+    @property
+    def downgrade_path(self) -> list[str]:
+        return self.numeric.downgrade_path
+
+    @property
+    def allocation(self) -> Allocation | None:
+        return self.numeric.allocation
+
+    @property
+    def risk(self) -> RiskReport | None:
+        return self.numeric.risk
+
+    @property
+    def ips(self) -> IPSDocument | None:
+        return self.numeric.ips
+
+    @property
+    def expected_cagr(self) -> float | None:
+        return self.numeric.expected_cagr
+
+    @property
+    def breaches(self) -> list[Breach]:
+        return self.numeric.breaches
+
+    @property
+    def data_version(self) -> str:
+        return self.numeric.data_version
+
+    @property
+    def result_hash(self) -> str:
+        """재현성 해시 = numeric_hash(서술 제외, §7). 하위호환 별칭."""
+        return self.numeric_hash
+
+    # --- 하위호환 접근자(자문 서술) ---
+    @property
+    def explanation(self) -> str:
+        return self.narrative.explanation
+
+    @property
+    def reelicitation(self) -> str | None:
+        return self.narrative.reelicitation
 
 
 def _round_floats(obj, ndigits: int = 6):
@@ -54,9 +112,17 @@ def _round_floats(obj, ndigits: int = 6):
     return obj
 
 
-def _canonical_hash(result: PipelineResult) -> str:
-    payload = result.model_dump(mode="json", exclude={"result_hash"})
+def _canonical_hash(numeric: NumericResult) -> str:
+    """결정론 코어 정규화 JSON의 SHA256. 서술(Narrative) 미포함(§7)."""
+    payload = numeric.model_dump(mode="json")
     canon = json.dumps(_round_floats(payload), sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(canon.encode("utf-8")).hexdigest()
+
+
+def _narrative_hash(narr: Narrative) -> str:
+    """자문 서술 해시(감사용). numeric_hash에는 포함하지 않는다(§3.4)."""
+    payload = narr.model_dump(mode="json")
+    canon = json.dumps(payload, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(canon.encode("utf-8")).hexdigest()
 
 
@@ -65,18 +131,19 @@ def run(
 ) -> PipelineResult:
     """설문 → 리포트 E2E. 강등 루프는 여기(pipeline)가 소유(08 §7).
 
-    source='synthetic'(기본, M4 스켈레톤·오프라인) | 'real'(M5, 실 20년 스냅샷).
+    source='synthetic'(기본, M4 스켈레톤·오프라인) | 'real'(M5, 실 20년 피닝 스냅샷).
+    'real'은 **피닝 스냅샷만 소비**한다(라이브 재수집 없음, v2 §3.1) — 핀 부재 시 하드 실패.
     """
     returns_fn = None
     data_version = data.DATA_VERSION
     if source == "real":
         from apex.allocation import MODEL_PORTFOLIOS
-        from apex.data import loader
+        from apex.data import loader, snapshot
 
         universe = tuple(sorted({t for w in MODEL_PORTFOLIOS.values() for t in w}))
-        _mat = loader.load_returns_matrix(universe)  # 1회 로드, 루프 내 재사용
-        # 실 스냅샷 content-hash → data_version(재실행 변동 대면 고지, §9)
-        data_version = "real-" + hashlib.sha256(_mat.to_numpy().tobytes()).hexdigest()[:12]
+        _mat = loader.load_returns_matrix(universe)  # 핀 소비(1회 로드, 루프 내 재사용)
+        # 실 data_version = 피닝 매니페스트 해시(재실행·크로스머신 안정, §3.1·§6)
+        data_version = "real-" + snapshot.pinned_data_version()
 
         def returns_fn(w: dict[str, float]) -> object:
             return loader.portfolio_returns_quarterly(_mat, w, cost_bps=loader.DEFAULT_COST_BPS)
@@ -128,7 +195,7 @@ def run(
             "참고하시고, 감내 한도를 다시 확인해 보세요(교육용, 개인 지시 아님)."
         )
 
-    result = PipelineResult(
+    numeric = NumericResult(
         decision=decision,
         final_profile=profile.profile.value,
         risk_score=profile.risk_score,
@@ -138,9 +205,17 @@ def run(
         ips=ips_doc,
         expected_cagr=exp_cagr,
         breaches=breaches,
-        reelicitation=investor.reelicitation_note(answers),
-        explanation=explanation,
+        schema_version=SCHEMA_VERSION,
         data_version=data_version,
+        env_hash=ENV_HASH,
     )
-    result.result_hash = _canonical_hash(result)
-    return result
+    narrative = Narrative(
+        explanation=explanation,
+        reelicitation=investor.reelicitation_note(answers),
+    )
+    return PipelineResult(
+        numeric=numeric,
+        narrative=narrative,
+        numeric_hash=_canonical_hash(numeric),
+        narrative_hash=_narrative_hash(narrative),
+    )

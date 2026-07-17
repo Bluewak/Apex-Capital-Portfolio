@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 import typer
 
-from apex import __version__, pipeline
+from apex import __version__, pipeline, store
 from apex import currency as ccy
 from apex.schemas import SurveyAnswers
 
@@ -29,6 +30,11 @@ def _run_and_write(
 ) -> int:
     res = pipeline.run(answers, currency=currency, source=source)
     _summarize(res)
+    # 서빙 계층에서만 원장 봉인(pipeline.run은 순수, v2 §3.6)
+    rec = store.append_run(
+        res, answers, source, currency, datetime.now(UTC).isoformat()
+    )
+    typer.echo(f"[원장] run_id {rec.run_id} → {store.LEDGER}")
     out_path = Path(out)
     if out_path.suffix.lower() == ".html":
         from apex import report
@@ -58,6 +64,31 @@ def run(
     answers = SurveyAnswers(**json.loads(Path(input_path).read_text(encoding="utf-8")))
     src = "real" if real else "synthetic"
     raise typer.Exit(code=_run_and_write(answers, ccy.normalize(currency), out, source=src))
+
+
+@app.command()
+def replay(
+    run_id: str = typer.Option(..., "--run-id", help="원장 run_id 또는 numeric_hash 접두"),
+) -> None:
+    """원장에서 입력·버전을 복원해 재실행 → numeric_hash 대조(v2 §3.6 재현성 증명).
+
+    '재현성'을 주장이 아니라 실행 명령으로. 일치=exit 0, 불일치(표류)=exit 3.
+    """
+    rec = store.find(run_id)
+    if rec is None:
+        typer.echo(f"원장에 run_id={run_id} 없음 ({store.LEDGER})")
+        raise typer.Exit(code=1)
+    answers = SurveyAnswers(**rec.answers)
+    res = pipeline.run(answers, currency=rec.display_currency, source=rec.source)
+    match = res.numeric_hash == rec.numeric_hash
+    typer.echo(f"run_id {rec.run_id} · source {rec.source} · data {rec.data_version}")
+    typer.echo(f"  원장 numeric_hash: {rec.numeric_hash[:16]}…")
+    typer.echo(f"  재실행 numeric_hash: {res.numeric_hash[:16]}…")
+    if match:
+        typer.echo("재현 일치 ✓ (수치 산출 동일)")
+    else:
+        typer.echo("재현 불일치 ✗ — 데이터/코드/환경 표류 가능(env_hash·data_version 확인)")
+    raise typer.Exit(code=0 if match else 3)
 
 
 portfolio_app = typer.Typer(help="포트폴리오 (M5): 07§7 포트↔상한 사전검증 게이트")
