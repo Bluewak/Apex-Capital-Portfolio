@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from .allocation import Allocation
 from .backtest import BacktestResult, Period, ScenarioResult
+from .cma import CMASet
 from .compliance import ComplianceDecision
 from .enums import Behavior, Experience, FxPreference, Liquidity, Objective, Profile
 from .investor import Constraints, InvestorProfile
@@ -16,6 +17,7 @@ __all__ = [
     "BacktestResult",
     "Period",
     "ScenarioResult",
+    "CMASet",
     "ComplianceDecision",
     "Behavior",
     "Experience",
