@@ -55,6 +55,7 @@ def run_advice(cmd: AdviceCommand, reg: Registry | None = None) -> PipelineResul
         rr = risk.assemble(entry, display_currency=cmd.display_currency)  # forward + 실현 disclosed
         dec = compliance.check(rr, profile)  # forward-binding 활성
         breaches.extend(dec.breaches)
+        breaches.extend(compliance.structural_breaches(alloc, profile))  # KG 구조 검증(§3, 골든 0)
         if dec.decision == "ok":
             decision = "ok"
             exp_cagr = entry.forward.expected_return

@@ -13,34 +13,14 @@ from __future__ import annotations
 
 import numpy as np
 
+from apex.compliance import CLASS_BANDS as _PROFILE_BANDS  # 밴드·캡 정본 = compliance
+from apex.compliance import ETF_CLASS_CAP as _ETF_CAP
 from apex.schemas import Allocation, CMASet
 from apex.schemas.enums import Profile
 from apex.universe import ASSET_CLASS
 
 OPT_METHOD_VERSION = "twolevel-mvo-v1"
 
-# per-ETF 집중 상한(단일 ETF, 07 §3). 클래스별 상한.
-_ETF_CAP = {"EQ": 0.30, "BOND": 0.40, "GOLD": 0.15, "CASH": 1.00}
-
-# 성향별 자산군 밴드(07 §3, 현 MODEL_PORTFOLIOS를 브래킷). CMA는 이 안에서만 tilt.
-# 각 값은 (하한, 상한). 클래스 예산 MVO의 box 제약.
-_PROFILE_BANDS: dict[Profile, dict[str, tuple[float, float]]] = {
-    Profile.ULTRA_CONSERVATIVE: {
-        "EQ": (0.0, 0.15), "BOND": (0.10, 0.30), "GOLD": (0.0, 0.10), "CASH": (0.55, 0.80),
-    },
-    Profile.CONSERVATIVE: {
-        "EQ": (0.20, 0.40), "BOND": (0.40, 0.65), "GOLD": (0.0, 0.15), "CASH": (0.03, 0.15),
-    },
-    Profile.NEUTRAL: {
-        "EQ": (0.45, 0.65), "BOND": (0.20, 0.40), "GOLD": (0.0, 0.12), "CASH": (0.05, 0.15),
-    },
-    Profile.GROWTH: {
-        "EQ": (0.65, 0.85), "BOND": (0.05, 0.25), "GOLD": (0.0, 0.10), "CASH": (0.03, 0.12),
-    },
-    Profile.AGGRESSIVE: {
-        "EQ": (0.80, 0.95), "BOND": (0.0, 0.15), "GOLD": (0.0, 0.10), "CASH": (0.03, 0.10),
-    },
-}
 # 성향별 vol 타깃(05 §3 평시 상한). 클래스 예산 MVO의 λ-이분 목표.
 _VOL_TARGET: dict[Profile, float] = {
     Profile.ULTRA_CONSERVATIVE: 0.035, Profile.CONSERVATIVE: 0.06,

@@ -15,7 +15,7 @@ import json
 
 from pydantic import BaseModel
 
-from apex import backtest, data, investor, ips, spi
+from apex import backtest, compliance, data, investor, ips, spi
 from apex.provenance import ENV_HASH, MODEL_VERSION, SCHEMA_VERSION
 from apex.schemas import (
     Allocation,
@@ -172,6 +172,7 @@ def run(
         )
         dec = svc.compliance.check(rr, profile)
         breaches.extend(dec.breaches)
+        breaches.extend(compliance.structural_breaches(alloc, profile))  # KG 구조 검증(§3, 골든 0)
 
         if dec.decision == "ok":
             decision = "ok"

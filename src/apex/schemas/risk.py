@@ -16,11 +16,12 @@ class StressResult(BaseModel):
 
 
 class Breach(BaseModel):
-    """성향별 상한 위반 (05 §3)."""
+    """성향별 상한 위반 (05 §3). ``because``=근거경로(KG 검증 시 기여 자산, docs/12 §3)."""
 
     metric: str
     limit: float
     actual: float
+    because: list[str] = Field(default_factory=list)
 
 
 class RiskReport(BaseModel):
