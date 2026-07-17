@@ -4,9 +4,11 @@
 
 ## 지금 어디인가
 
-**v2 Step 0~3 전부 완료 · 4평면(Data·Model·Serving·Advisory)+Run Ledger 구현(pytest 95).**
-잔여는 선택·비차단(골든 대사·FX 실소싱·DSR/PBO·핀 커밋·LLM Narrator 실교체).
-어떤 작업이든 **착수 전 아래 두 문서를 먼저 읽고 방향을 정합**한다:
+**v2 완료 — Step 0~3 + 완료잔여 A~G 전부.** 4평면(Data·Model·Serving·Advisory)+Run
+Ledger + KG compliance검증·검증게이트(PSR/Kupiec)·FX실소싱·골든대사(TR정합 10/10)·
+S&P500 503종 KG소속·핀커밋·LLM Narrator(로컬 Qwen 어댑터). **pytest 130·ruff clean.**
+남은 건 v2 밖(개별종목 시세핀 E2·ETF 보유종목 룩스루 E3 — 라이브 fetch/holdings 데이터
+필요, 이 환경 차단). 어떤 작업이든 **착수 전 아래 두 문서를 먼저 읽고 방향을 정합**한다:
 
 - **방향성 북극성 → [docs/11-direction.md](docs/11-direction.md)** — why/direction + 절대 가드레일(§5) + 워치리스트. **v2 작업 전 §5 필독.**
 - **v2 설계(how) → [docs/10-v2-pipeline-design.md](docs/10-v2-pipeline-design.md)** — 4평면·SPI·착수 스텝(§9).
