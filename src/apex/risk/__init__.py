@@ -8,7 +8,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from apex import data, metrics
+from apex import data, graph, metrics
 from apex.scenarios import STRESS_WINDOWS, normal_mask, window_drawdown
 from apex.schemas import Allocation, Concentration, PrecomputedEntry, RiskReport, StressResult
 from apex.universe import ASSET_CLASS
@@ -53,7 +53,8 @@ def report(
         var95_annual=metrics.var95_annual(limit_ret),
         sharpe=metrics.sharpe(full),
         calmar=metrics.calmar(full),
-        currency_exposure={"USD": 1.0},  # 전 슬롯 USD 표시(EFA/EEM도 USD ETF)
+        # 통화 노출: KG 룩스루 실계산(EFA/EEM 외화 분해). 하드코딩 USD 100% 제거(§3.5·docs/12)
+        currency_exposure=graph.currency_exposure(alloc.weights),
         concentration=Concentration(
             max_asset_class=max(by_class.values()),
             max_etf=max(alloc.weights.values()),
