@@ -77,11 +77,12 @@ def test_registry_lookup_snaps_min_cash_conservative():
 
 
 def test_registry_realized_when_matrix_given():
-    """행렬 주입 시 실현 지표 병기(백테스트), 없으면 None."""
+    """행렬 주입 시 실현 RiskReport 병기(백테스트), 없으면 None."""
     reg_fwd = registry.build(_cma(), min_cash_grid=(0.05,), profiles=(Profile.NEUTRAL,))
-    assert reg_fwd.entries[0].realized_var95_annual is None
+    assert reg_fwd.entries[0].realized is None
     reg_real = registry.build(_cma(), _mat(), min_cash_grid=(0.05,), profiles=(Profile.NEUTRAL,))
-    assert reg_real.entries[0].realized_var95_annual is not None
+    assert reg_real.entries[0].realized is not None
+    assert reg_real.entries[0].realized.var95_annual is not None
 
 
 def test_registry_save_load_roundtrip(tmp_path):

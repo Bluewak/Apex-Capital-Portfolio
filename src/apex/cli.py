@@ -25,15 +25,11 @@ def _summarize(res: pipeline.PipelineResult) -> None:
     typer.echo(f"[재현성 해시] {res.result_hash[:16]}… · 데이터버전 {res.data_version}")
 
 
-def _run_and_write(
-    answers: SurveyAnswers, currency: str, out: str, source: str = "synthetic"
-) -> int:
-    res = pipeline.run(answers, currency=currency, source=source)
+def _write_result(res, answers: SurveyAnswers, currency: str, out: str, source: str) -> int:
+    """산출물 요약·원장 봉인·파일 기록. pipeline.run/serving.run_advice 공용."""
     _summarize(res)
-    # 서빙 계층에서만 원장 봉인(pipeline.run은 순수, v2 §3.6)
-    rec = store.append_run(
-        res, answers, source, currency, datetime.now(UTC).isoformat()
-    )
+    # 서빙 계층에서만 원장 봉인(엔진은 순수, v2 §3.6)
+    rec = store.append_run(res, answers, source, currency, datetime.now(UTC).isoformat())
     typer.echo(f"[원장] run_id {rec.run_id} → {store.LEDGER}")
     out_path = Path(out)
     if out_path.suffix.lower() == ".html":
@@ -45,6 +41,13 @@ def _run_and_write(
         out_path.write_text(res.model_dump_json(indent=2), encoding="utf-8")
     typer.echo(f"산출물: {out_path}")
     return 0 if res.decision == "ok" else 2  # hold=2 (null-allocation exit code, 08 §7)
+
+
+def _run_and_write(
+    answers: SurveyAnswers, currency: str, out: str, source: str = "synthetic"
+) -> int:
+    res = pipeline.run(answers, currency=currency, source=source)
+    return _write_result(res, answers, currency, out, source)
 
 
 @app.command()
@@ -89,6 +92,37 @@ def replay(
     else:
         typer.echo("재현 불일치 ✗ — 데이터/코드/환경 표류 가능(env_hash·data_version 확인)")
     raise typer.Exit(code=0 if match else 3)
+
+
+@app.command()
+def advise(
+    input_path: str = typer.Option(..., "--input", help="설문 응답 JSON 경로"),
+    currency: str = typer.Option("krw", "--currency", help="표시 통화 krw|usd"),
+    out: str = typer.Option("report.html", "--out", help="산출물 경로(.html→리포트, 그 외→JSON)"),
+) -> None:
+    """서빙(v2 §3.3): 사전연산 레지스트리 O(1) 조회 + forward-binding compliance E2E.
+
+    `apex model build`로 레지스트리를 먼저 생성해야 함(핀 우선). 20년 백테스트 미반복.
+    """
+    from apex import serving
+    from apex.serving import AdviceCommand
+
+    answers = SurveyAnswers(**json.loads(Path(input_path).read_text(encoding="utf-8")))
+    ccy_n = ccy.normalize(currency)
+    res = serving.run_advice(AdviceCommand(answers=answers, display_currency=ccy_n))
+    raise typer.Exit(code=_write_result(res, answers, ccy_n, out, "advice"))
+
+
+@app.command()
+def serve(
+    host: str = typer.Option("127.0.0.1", "--host"),
+    port: int = typer.Option(8765, "--port"),
+) -> None:
+    """웹 브리지(v2 §7): 설문 폼 제출 → run_advice → HTML 리포트 즉시 반환(무터미널)."""
+    from apex import web
+
+    typer.echo(f"Apex 웹 브리지 · http://{host}:{port}  (Ctrl+C 종료)")
+    web.serve(host, port)
 
 
 portfolio_app = typer.Typer(help="포트폴리오 (M5): 07§7 포트↔상한 사전검증 게이트")
@@ -180,8 +214,8 @@ def model_build(
             for t, w in sorted(e.allocation.weights.items(), key=lambda x: -x[1])[:3]
         )
         rv = (
-            f"{e.realized_var95_annual * 100:5.1f}%"
-            if e.realized_var95_annual is not None else "  —  "
+            f"{e.realized.var95_annual * 100:5.1f}%"
+            if e.realized is not None else "  —  "
         )
         typer.echo(
             f"{e.profile.value:8s} {e.min_cash * 100:4.0f}% "

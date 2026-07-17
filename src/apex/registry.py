@@ -15,21 +15,23 @@ import pandas as pd
 
 from apex import forward, optimizer
 from apex.provenance import ENV_HASH
-from apex.schemas import CMASet, PrecomputedEntry, Registry
+from apex.schemas import Allocation, CMASet, PrecomputedEntry, Registry, RiskReport
 from apex.schemas.enums import Profile
 
 REGISTRY_DIR = Path("artifacts/registry")
 DEFAULT_MIN_CASH_GRID = (0.0, 0.05, 0.10)
 
 
-def _realized(mat: pd.DataFrame, weights: dict[str, float]) -> tuple[float, float]:
-    """배분을 피닝 스냅샷으로 백테스트 → 실현 평시(위기 제외) VaR95_annual·MDD(disclosed)."""
-    from apex import metrics
-    from apex.data import loader
+def _realized(mat: pd.DataFrame, alloc: Allocation) -> RiskReport:
+    """배분을 피닝 스냅샷으로 백테스트 → 실현 평시(위기 제외) RiskReport(disclosed)."""
+    from apex import risk
+    from apex.data import build_return_series, loader
 
-    port = loader.portfolio_returns_quarterly(mat, weights, cost_bps=loader.DEFAULT_COST_BPS)
-    normal, _ = loader.split_normal_stress(port)
-    return round(metrics.var95_annual(normal), 6), round(metrics.mdd(normal), 6)
+    port = loader.portfolio_returns_quarterly(
+        mat, alloc.weights, cost_bps=loader.DEFAULT_COST_BPS
+    )
+    series = build_return_series(port.to_numpy(), currency="USD", index=port.index)
+    return risk.report(series, alloc, display_currency="KRW", normal_only=True)
 
 
 def build(
@@ -48,11 +50,10 @@ def build(
         for mc in min_cash_grid:
             alloc = optimizer.optimize(cma, profile, min_cash=mc)
             fr = forward.forward_risk(cma, alloc.weights)
-            rv, rm = (None, None) if mat is None else _realized(mat, alloc.weights)
+            realized = None if mat is None else _realized(mat, alloc)
             entries.append(
                 PrecomputedEntry(
-                    profile=profile, min_cash=mc, allocation=alloc, forward=fr,
-                    realized_var95_annual=rv, realized_mdd=rm,
+                    profile=profile, min_cash=mc, allocation=alloc, forward=fr, realized=realized,
                 )
             )
     return Registry(

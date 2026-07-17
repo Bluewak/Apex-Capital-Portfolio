@@ -10,7 +10,7 @@ import pandas as pd
 
 from apex import data, metrics
 from apex.scenarios import STRESS_WINDOWS, normal_mask, window_drawdown
-from apex.schemas import Allocation, Concentration, RiskReport, StressResult
+from apex.schemas import Allocation, Concentration, PrecomputedEntry, RiskReport, StressResult
 from apex.universe import ASSET_CLASS
 
 
@@ -59,4 +59,21 @@ def report(
             max_etf=max(alloc.weights.values()),
         ),
         stress=stress,
+    )
+
+
+def assemble(entry: PrecomputedEntry, display_currency: str = "KRW") -> RiskReport:
+    """레지스트리 엔트리 → 서빙용 RiskReport (v2 §3.3).
+
+    실현 RiskReport(disclosed·사전연산)에 **forward 기대손실**(compliance 차단 지표)과
+    표시 통화를 오버레이. 20년 백테스트를 반복하지 않는 O(1) 조립.
+    """
+    base = entry.realized
+    if base is None:
+        raise ValueError("실현 RiskReport 없는 엔트리 — `apex model build`로 사전연산 필요")
+    return base.model_copy(
+        update={
+            "display_currency": display_currency,
+            "expected_loss_1y_forward": entry.forward.expected_loss_1y,
+        }
     )

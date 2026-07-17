@@ -44,6 +44,10 @@ select = ["E", "F", "I", "UP", "B"]
 "tools/**" = ["E501"]
 # report는 HTML/CSS 템플릿 문자열: 긴 줄 예외
 "src/apex/report/__init__.py" = ["E501"]
+# advisory는 한글 서술(Narrator) 템플릿 문자열: 긴 줄 예외
+"src/apex/advisory.py" = ["E501"]
+# web은 HTML 설문 폼 템플릿 문자열: 긴 줄 예외
+"src/apex/web.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

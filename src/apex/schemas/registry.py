@@ -10,10 +10,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .allocation import Allocation
 from .enums import Profile
+from .risk import RiskReport
 
 
 class ForwardRisk(BaseModel):
-    """CMA 기반 forward 리스크(2d compliance 차단 후보). 실현치 아님."""
+    """CMA 기반 forward 리스크(compliance 차단 지표). 실현치 아님."""
 
     expected_return: float = Field(description="연 forward 기대수익 μ_p")
     vol: float = Field(description="연 forward 변동성")
@@ -21,7 +22,7 @@ class ForwardRisk(BaseModel):
 
 
 class PrecomputedEntry(BaseModel):
-    """(성향 × min_cash) 1칸 = 배분 + forward 리스크 + 실현 요약(disclosed)."""
+    """(성향 × min_cash) 1칸 = 배분 + forward 리스크(차단) + 실현 RiskReport(disclosed)."""
 
     model_config = ConfigDict(protected_namespaces=())
 
@@ -29,8 +30,7 @@ class PrecomputedEntry(BaseModel):
     min_cash: float
     allocation: Allocation
     forward: ForwardRisk
-    realized_var95_annual: float | None = None  # 실현 평시 연율 VaR(disclosed)
-    realized_mdd: float | None = None  # 실현 평시 MDD(disclosed)
+    realized: RiskReport | None = None  # 실현 평시 RiskReport(백테스트, disclosed)
 
 
 class Registry(BaseModel):

@@ -9,6 +9,8 @@ from datetime import date
 
 from apex.schemas import Allocation
 from apex.schemas.enums import Profile
+from apex.schemas.investor import Constraints
+from apex.universe import ASSET_CLASS
 
 # 성향별 고정비중(합=1.0). 08 §10·07 §3 예시.
 MODEL_PORTFOLIOS: dict[Profile, dict[str, float]] = {
@@ -52,3 +54,25 @@ def build(profile: Profile, min_cash: float = 0.0, as_of: date | None = None) ->
         weights=w,
         as_of=as_of or date(2026, 7, 7),
     )
+
+
+def apply_constraints(base: Allocation, constraints: Constraints) -> Allocation:
+    """사전연산 배분(§3.2)에 제약 오버레이 재검증 (v2 §3.3 Serving).
+
+    현금성(CASH)이 min_cash 미달이면 SHY를 하한으로 끌어올리고 나머지를 비례 축소.
+    사전연산 그리드가 min_cash와 일치하면(투자자 min_cash∈{0.05,0.10}⊂그리드) 사실상
+    항등이며, 이 함수는 오버레이가 밴드를 깨지 않는지 재검증하는 지점(현재 미검증 해소).
+    """
+    w = dict(base.weights)
+    cash = sum(v for t, v in w.items() if ASSET_CLASS.get(t) == "CASH")
+    mc = constraints.min_cash
+    if cash >= mc - 1e-9:
+        return base  # 그리드 일치 → 항등(이미 min_cash 충족)
+    w.setdefault("SHY", 0.0)
+    others = sum(v for t, v in w.items() if t != "SHY")
+    scale = (1.0 - mc) / others if others > 0 else 0.0
+    w = {t: (mc if t == "SHY" else v * scale) for t, v in w.items()}
+    items = sorted(w.items(), key=lambda kv: -kv[1])
+    w = {t: round(v, 6) for t, v in items}
+    w[items[0][0]] = round(w[items[0][0]] + (1.0 - sum(w.values())), 6)  # 합=1 잔차 흡수
+    return base.model_copy(update={"weights": w})
