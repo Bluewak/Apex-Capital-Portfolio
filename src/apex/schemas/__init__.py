@@ -8,7 +8,7 @@ from .compliance import ComplianceDecision
 from .enums import Behavior, Experience, FxPreference, Liquidity, Objective, Profile
 from .investor import Constraints, InvestorProfile
 from .ips import IPSDocument
-from .registry import ForwardRisk, PrecomputedEntry, Registry
+from .registry import ForwardRisk, PrecomputedEntry, Registry, ValidationResult
 from .result import Narrative, NumericResult
 from .risk import Breach, Concentration, RiskReport, StressResult
 from .survey import SurveyAnswers
@@ -32,6 +32,7 @@ __all__ = [
     "ForwardRisk",
     "PrecomputedEntry",
     "Registry",
+    "ValidationResult",
     "Narrative",
     "NumericResult",
     "Breach",

@@ -21,8 +21,18 @@ class ForwardRisk(BaseModel):
     expected_loss_1y: float = Field(description="forward 1년 5% 꼬리 기대손실(양수)")
 
 
+class ValidationResult(BaseModel):
+    """검증 게이트 결과 (v2 §3.2). 통계적 방어(과최적화·꼬리·OOS)."""
+
+    psr: float = Field(description="Deflated PSR = P(참 Sharpe > 다중검정 SR*)")
+    kupiec_p: float = Field(description="Kupiec POF p값(VaR 커버리지)")
+    kupiec_pass: bool
+    oos_stable: bool = Field(description="IS/OOS Sharpe 부호 안정")
+    passed: bool = Field(description="종합 통과(PSR·Kupiec·OOS)")
+
+
 class PrecomputedEntry(BaseModel):
-    """(성향 × min_cash) 1칸 = 배분 + forward 리스크(차단) + 실현 RiskReport(disclosed)."""
+    """(성향 × min_cash) 1칸 = 배분 + forward(차단) + 실현(disclosed) + 검증 게이트."""
 
     model_config = ConfigDict(protected_namespaces=())
 
@@ -31,6 +41,7 @@ class PrecomputedEntry(BaseModel):
     allocation: Allocation
     forward: ForwardRisk
     realized: RiskReport | None = None  # 실현 평시 RiskReport(백테스트, disclosed)
+    validation: ValidationResult | None = None  # 검증 게이트(PSR·Kupiec·OOS)
 
 
 class Registry(BaseModel):
