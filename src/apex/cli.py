@@ -193,6 +193,22 @@ def data_pull(
     raise typer.Exit(code=0 if all_pass else 1)
 
 
+@data_app.command("rates")
+def data_rates(
+    start: str = typer.Option("2005-01-01", "--start", help="수집 시작일"),
+    no_pin: bool = typer.Option(False, "--no-pin", help="artifacts 피닝 생략"),
+) -> None:
+    """FRED에서 무위험금리(USD/KRW 3M)·환율(원/달러) 수집·피닝(§3.1, 하드코딩 rf 제거)."""
+    from apex.data import rates
+
+    r = rates.pull_rates(start=start, pin=not no_pin)
+    typer.echo(
+        f"USD rf {r['usd_rf'] * 100:.2f}% · KRW rf {r['krw_rf'] * 100:.2f}% · "
+        f"원/달러 {r['fx_krwusd']:.0f} · 기간 {r['period'][0]}~{r['period'][1]}"
+    )
+    typer.echo(f"rates_version {r['rates_version']}")
+
+
 model_app = typer.Typer(help="Model Plane (M-v2): CMA→Optimizer 사전연산 레지스트리")
 app.add_typer(model_app, name="model")
 

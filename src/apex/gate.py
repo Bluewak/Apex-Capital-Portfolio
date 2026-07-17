@@ -59,13 +59,16 @@ def _bench_stats(ret: np.ndarray, rf_annual: float = 0.02) -> dict[str, float]:
     }
 
 
-# 통화별 무위험이자 근사 (Sharpe용). 실 소싱은 M5 정밀화(DGS3MO / ECOS CD).
-_RF_USD = 0.02
-_RF_KRW = 0.025
-
-
 def run(start: str = "2005-01-01", end: str | None = None) -> dict:
-    """게이트 실행. 반환: rows(5종)·benchmarks(3종)·기간."""
+    """게이트 실행. 반환: rows(5종)·benchmarks(3종)·기간.
+
+    Sharpe 무위험은 **통화별 실소싱**(피닝 FRED, §3.1): USD 3M / KRW 3M. 핀 부재 시
+    문서화 기본값 폴백. `apex data rates`로 실측 갱신.
+    """
+    from apex.data import rates
+
+    r = rates.load_pinned_rates()
+    rf_usd, rf_krw = float(r["usd_rf"]), float(r["krw_rf"])
     mat = loader.load_returns_matrix(_universe(), start, end)
 
     rows: list[GateRow] = []
@@ -85,17 +88,17 @@ def run(start: str = "2005-01-01", end: str | None = None) -> dict:
         )
 
     benchmarks: dict[str, dict] = {
-        "S&P500 (SPY TR)": _bench_stats(mat["SPY"].to_numpy()),
+        "S&P500 (SPY TR)": _bench_stats(mat["SPY"].to_numpy(), rf_annual=rf_usd),
         "60/40 (SPY60+IEF40)": _bench_stats(
             loader.portfolio_returns_quarterly(
                 mat, {"SPY": 0.6, "IEF": 0.4}, cost_bps=loader.DEFAULT_COST_BPS
-            ).to_numpy()
+            ).to_numpy(), rf_annual=rf_usd
         ),
     }
     try:
         kospi = loader.load_ticker_returns(_KOSPI, start, end)
-        # KRW 시계열이므로 KRW CD 근사 무위험 사용(USD rf로 계산 시 왜곡, R3 퀀트)
-        benchmarks["KOSPI200 (KODEX200, KRW)"] = _bench_stats(kospi.to_numpy(), rf_annual=_RF_KRW)
+        # KRW 시계열이므로 KRW 무위험 사용(USD rf로 계산 시 왜곡, R3 퀀트)
+        benchmarks["KOSPI200 (KODEX200, KRW)"] = _bench_stats(kospi.to_numpy(), rf_annual=rf_krw)
     except Exception as e:  # noqa: BLE001 — 벤치마크 소싱 실패는 게이트 중단 아님
         benchmarks["KOSPI200 (KODEX200, KRW)"] = {"error": str(e)[:50]}
 
