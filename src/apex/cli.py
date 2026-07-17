@@ -159,6 +159,38 @@ def data_pull(
     raise typer.Exit(code=0 if all_pass else 1)
 
 
+model_app = typer.Typer(help="Model Plane (M-v2): CMA→Optimizer 사전연산 레지스트리")
+app.add_typer(model_app, name="model")
+
+
+@model_app.command("build")
+def model_build(
+    start: str = typer.Option("2005-01-01", "--start", help="CMA·백테스트 시작일"),
+) -> None:
+    """피닝 스냅샷→CMA→Optimizer로 5성향×min_cash 사전연산 레지스트리 생성·저장(§3.2)."""
+    from apex import registry
+
+    reg = registry.build_from_pinned(start)
+    path = registry.save(reg)
+    typer.echo(f"CMA {reg.cma_version} · model {reg.model_version} · data {reg.data_version}")
+    typer.echo(f"{'성향':8s} {'min$':>5s} {'fwd손실':>7s} {'fwdvol':>7s} {'실현VaR':>7s} 상위배분")
+    for e in reg.entries:
+        top = " ".join(
+            f"{t}{w * 100:.0f}"
+            for t, w in sorted(e.allocation.weights.items(), key=lambda x: -x[1])[:3]
+        )
+        rv = (
+            f"{e.realized_var95_annual * 100:5.1f}%"
+            if e.realized_var95_annual is not None else "  —  "
+        )
+        typer.echo(
+            f"{e.profile.value:8s} {e.min_cash * 100:4.0f}% "
+            f"{e.forward.expected_loss_1y * 100:6.1f}% "
+            f"{e.forward.vol * 100:6.1f}% {rv:>7s} {top}"
+        )
+    typer.echo(f"\n엔트리 {len(reg.entries)}칸 저장: {path}")
+
+
 @app.command()
 def demo(
     case: str = typer.Option("retiree", "--case", help="retiree|aggressive|hold"),
