@@ -10,10 +10,13 @@ dist/
 .venv/
 venv/
 
-# 데이터 캐시·산출 아티팩트 (재현성: raw 스냅샷은 content-hash 피닝, 커밋 안 함)
+# 데이터 캐시·산출 아티팩트. 재현성 소스 핀(snapshots·rates)은 커밋,
+# 파생물(registry)·런타임(ledger)은 무시(코드+핀에서 재생성).
 # 루트 앵커(/) 필수 — 없으면 소스 패키지 src/apex/data/까지 무시됨
 /data/
-/artifacts/
+/artifacts/*
+!/artifacts/snapshots/
+!/artifacts/rates/
 *.parquet
 *.feather
 
