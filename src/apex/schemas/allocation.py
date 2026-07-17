@@ -5,13 +5,15 @@ from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .enums import Profile
+
 
 class Allocation(BaseModel):
     """성향 → 모델포트폴리오 배분(티커·비중). weights 합=1.0, 음수 불가 (06 §3.3)."""
 
     model_config = ConfigDict(protected_namespaces=())  # model_portfolio/model_version 허용
 
-    profile: str
+    profile: Profile  # str→enum(Step 1 타입 안전). StrEnum이라 JSON 직렬화는 값 문자열 동일
     model_portfolio: str
     weights: dict[str, float]
     rebalance_band_pp: float = Field(default=5, description="리밸런싱 밴드(±%p)")

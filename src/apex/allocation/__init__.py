@@ -47,7 +47,7 @@ def build(profile: Profile, min_cash: float = 0.0, as_of: date | None = None) ->
         scale = (1.0 - min_cash) / others_sum if others_sum > 0 else 0.0
         w = {k: (min_cash if k == "SHY" else v * scale) for k, v in w.items()}
     return Allocation(
-        profile=profile.value,
+        profile=profile,
         model_portfolio=profile.model_portfolio,
         weights=w,
         as_of=as_of or date(2026, 7, 7),

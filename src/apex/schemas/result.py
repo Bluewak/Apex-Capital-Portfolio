@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from apex.provenance import ENV_HASH, SCHEMA_VERSION
+from apex.provenance import ENV_HASH, MODEL_VERSION, SCHEMA_VERSION
 
 from .allocation import Allocation
 from .ips import IPSDocument
@@ -32,6 +32,7 @@ class NumericResult(BaseModel):
     breaches: list[Breach] = Field(default_factory=list)
     schema_version: str = SCHEMA_VERSION
     data_version: str = ""
+    model_version: str = MODEL_VERSION  # 배분 산출 모델 리니지(Step 2 레지스트리 교체 대상)
     env_hash: str = ENV_HASH
 
 

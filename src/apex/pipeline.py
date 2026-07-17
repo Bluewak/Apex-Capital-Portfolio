@@ -15,8 +15,8 @@ import json
 
 from pydantic import BaseModel
 
-from apex import allocation, backtest, compliance, data, investor, ips, risk
-from apex.provenance import ENV_HASH, SCHEMA_VERSION
+from apex import backtest, data, investor, ips, spi
+from apex.provenance import ENV_HASH, MODEL_VERSION, SCHEMA_VERSION
 from apex.schemas import (
     Allocation,
     Breach,
@@ -127,13 +127,20 @@ def _narrative_hash(narr: Narrative) -> str:
 
 
 def run(
-    answers: SurveyAnswers, currency: str = "KRW", source: str = "synthetic"
+    answers: SurveyAnswers,
+    currency: str = "KRW",
+    source: str = "synthetic",
+    services: spi.Services | None = None,
 ) -> PipelineResult:
     """설문 → 리포트 E2E. 강등 루프는 여기(pipeline)가 소유(08 §7).
 
     source='synthetic'(기본, M4 스켈레톤·오프라인) | 'real'(M5, 실 20년 피닝 스냅샷).
     'real'은 **피닝 스냅샷만 소비**한다(라이브 재수집 없음, v2 §3.1) — 핀 부재 시 하드 실패.
+
+    ``services``: 결정론 코어 서비스 번들(SPI DI, v2 §5). 기본은 룰 어댑터 —
+    Step 2/3에서 최적화·LLM 구현으로 계약 불변 교체(구현 대신 인터페이스에 의존).
     """
+    svc = services or spi.default_services()
     returns_fn = None
     data_version = data.DATA_VERSION
     if source == "real":
@@ -148,7 +155,7 @@ def run(
         def returns_fn(w: dict[str, float]) -> object:
             return loader.portfolio_returns_quarterly(_mat, w, cost_bps=loader.DEFAULT_COST_BPS)
 
-    profile: InvestorProfile = investor.score(answers)
+    profile: InvestorProfile = svc.investor.score(answers)
     path: list[str] = []
     breaches: list[Breach] = []
 
@@ -158,10 +165,12 @@ def run(
 
     # 재계산 루프: 위반 → 강등(revised_profile) 재배분. 사다리 유한 → 반드시 종료.
     for _ in range(6):  # 5구간 → 최대 4회 강등 + 여유
-        alloc = allocation.build(profile.profile, min_cash=profile.constraints.min_cash)
+        alloc = svc.allocation.build(profile.profile, min_cash=profile.constraints.min_cash)
         _bt, series = backtest.run(alloc, currency="USD", returns_fn=returns_fn)
-        rr = risk.report(series, alloc, display_currency=currency, normal_only=(source == "real"))
-        dec = compliance.check(rr, profile)
+        rr = svc.risk.report(
+            series, alloc, display_currency=currency, normal_only=(source == "real")
+        )
+        dec = svc.compliance.check(rr, profile)
         breaches.extend(dec.breaches)
 
         if dec.decision == "ok":
@@ -207,6 +216,7 @@ def run(
         breaches=breaches,
         schema_version=SCHEMA_VERSION,
         data_version=data_version,
+        model_version=MODEL_VERSION,
         env_hash=ENV_HASH,
     )
     narrative = Narrative(

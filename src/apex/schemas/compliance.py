@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from .investor import InvestorProfile
 from .risk import Breach
@@ -26,3 +26,16 @@ class ComplianceDecision(BaseModel):
     revised_profile: InvestorProfile | None = None
     downgrade_reason: str | None = None
     breaches: list[Breach] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _decision_profile_consistency(self) -> ComplianceDecision:
+        """역간선 상관 계약: downgrade ⟹ revised_profile 존재, ok/hold ⟹ None.
+
+        pipeline 루프가 downgrade에서 ``profile = dec.revised_profile``을 하므로,
+        downgrade인데 None이면 런타임 크래시. 타입이 이 조합을 원천 차단(§4).
+        """
+        if self.decision == "downgrade" and self.revised_profile is None:
+            raise ValueError("downgrade는 revised_profile이 필요합니다(역간선 계약 위반)")
+        if self.decision != "downgrade" and self.revised_profile is not None:
+            raise ValueError(f"{self.decision}에는 revised_profile이 없어야 합니다")
+        return self

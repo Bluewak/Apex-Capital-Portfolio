@@ -13,7 +13,11 @@ import sys
 import numpy as np
 import pandas as pd
 
-SCHEMA_VERSION = "1"
+SCHEMA_VERSION = "2"  # Step 1: model_version 전파·Allocation enum화·Compliance validator
+
+# 배분 산출 모델의 버전. v1 코어는 하드코딩 MODEL_PORTFOLIOS(룰). Step 2 Model Plane
+# (CMA→최적화→사전연산)이 레지스트리 버전으로 교체 → NumericResult에 각인해 리니지 추적.
+MODEL_VERSION = "rule-mp-v1"
 
 
 def _env_hash() -> str:
