@@ -39,30 +39,33 @@ def _price_returns(px: pd.Series) -> pd.Series:
 
 
 def _reference_returns(ticker: str, start: str, end: str | None) -> pd.Series:
-    """독립 레퍼런스(FDR) 일별 가격수익률."""
+    """독립 레퍼런스(FDR) 일별 **총수익**. 배당조정열 우선(TR vs TR 정합).
+
+    미국은 'Adj Close'(배당 back-adjust=TR), 한국 069500은 'Close'가 이미 분배 조정(TR류).
+    관례를 맞춰야 자기참조 아닌 실질 대조가 된다(원가격 vs 조정가격 혼용 금지).
+    """
     import FinanceDataReader as fdr
 
     df = fdr.DataReader(_FDR_SYMBOL[ticker], start, end)
-    return _price_returns(df["Close"])
+    col = "Adj Close" if "Adj Close" in df.columns else "Close"
+    return _price_returns(df[col])
 
 
 def _our_returns(ticker: str, start: str, end: str | None) -> pd.Series:
-    """우리 피닝 스냅샷의 원 종가 → 일별 가격수익률."""
-    from apex.data import snapshot
+    """우리 피닝 스냅샷의 **로컬 TR**(원가격 + 배당) — 레퍼런스 TR과 동일 관례로 대조."""
+    from apex.data import loader
 
-    df = snapshot.load_pinned(ticker)
-    df = df[df.index >= pd.Timestamp(start)] if start else df
-    df = df[df.index <= pd.Timestamp(end)] if end else df
-    return _price_returns(df["Close"])
+    return loader.load_ticker_returns(ticker, start, end)  # source='pinned' 기본, 배당 포함 TR
 
 
 def reconcile_golden(
-    ticker: str, start: str = "2010-01-01", end: str | None = None, tol_annual: float = 0.005
+    ticker: str, start: str = "2010-01-01", end: str | None = None, tol_annual: float = 0.01
 ) -> dict:
-    """우리 가격수익률 ↔ 독립 레퍼런스 대조. 반환: 편차·통과·계보.
+    """우리 로컬 TR ↔ 독립 레퍼런스 TR 대조. 반환: 편차·통과·계보.
 
-    판정 = **연율 수익률 편차**(``ann_dev`` < tol_annual, 기본 50bp/년). ``max_daily_abs``는
-    타임존·ex-date 단일일 잡음이라 참고만. 연율 편차가 커지면 독립 피드와 실질 괴리 = 조사 대상.
+    판정 = **연율 총수익 편차**(``ann_dev`` < tol_annual, 기본 100bp/년). 미국은 통상
+    <0.1%/년, 한국 069500은 분배 조정 관례 잔차로 ~0.7%/년. ``max_daily_abs``는 타임존·
+    ex-date 단일일 잡음이라 참고만. 편차가 tol 초과면 독립 피드와 실질 괴리 = 조사 대상.
     """
     ours = _our_returns(ticker, start, end)
     ref = _reference_returns(ticker, start, end)
