@@ -24,15 +24,22 @@ _TOL = 1e-9
 
 
 def check(risk: RiskReport, profile: InvestorProfile) -> ComplianceDecision:
-    """단일 판정. 위반 시 강등(revised_profile) 또는 hold. 루프 소유는 pipeline(08 §7)."""
+    """단일 판정. 위반 시 강등(revised_profile) 또는 hold. 루프 소유는 pipeline(08 §7).
+
+    차단 지표(§3.5): ``expected_loss_1y_forward``가 있으면 **forward 기대손실**로,
+    없으면 기존 실현 ``var95_annual``로(하위호환). forward는 강세장 표본 착시를 배제해
+    out-of-sample에서도 정직하게 리스크를 적립한다.
+    """
     limit = VAR_LIMIT[profile.profile]
     binding = min(limit, abs(profile.max_annual_loss))  # Q6 교차, 더 보수적
-    actual = risk.var95_annual
+    forward = risk.expected_loss_1y_forward
+    actual = forward if forward is not None else risk.var95_annual
+    metric = "expected_loss_1y_forward" if forward is not None else "var95_annual"
 
     if actual <= binding + _TOL:
         return ComplianceDecision(decision="ok")
 
-    breach = Breach(metric="var95_annual", limit=-binding, actual=-actual)
+    breach = Breach(metric=metric, limit=-binding, actual=-actual)
     revised = profile.downgraded()
     if revised is None:
         # 초안정형까지 소진 → 배정 보류(포트 미발행, R5)

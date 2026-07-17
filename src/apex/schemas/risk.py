@@ -37,7 +37,11 @@ class RiskReport(BaseModel):
     mdd_recovery_days: int | None = None
     var95_1d: float = Field(description="양수 손실률 표기")
     cvar95_1d: float = Field(description="양수 손실률 표기")
-    var95_annual: float = Field(description="연율 VaR95(평시)·양수손실률 — 컴플 바인딩(05 §3, R5)")
+    var95_annual: float = Field(description="연율 VaR95(평시)·양수손실률 — 실현 지표(disclosed)")
+    expected_loss_1y_forward: float | None = Field(
+        default=None,
+        description="forward 1년 기대손실(CMA 기반, 양수) — 있으면 compliance 차단 지표(v2 §3.5)",
+    )
     sharpe: float
     calmar: float
     currency_exposure: dict[str, float] = Field(
