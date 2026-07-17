@@ -231,6 +231,25 @@ def data_golden(
     typer.echo(f"\n독립 대사 통과 {n_pass}/{len(res['rows'])}")
 
 
+@data_app.command("membership")
+def data_membership(
+    no_pin: bool = typer.Option(False, "--no-pin", help="artifacts 피닝 생략"),
+) -> None:
+    """S&P500 종목 → 세부테마/테마군 분류·피닝(E1): 개별종목을 KG에 연결."""
+    from collections import Counter
+
+    from apex.data import membership
+
+    res = membership.pull_membership(pin=not no_pin)
+    mapped = sum(1 for v in res["stocks"].values() if v["mapped"])
+    typer.echo(
+        f"membership_version {res['membership_version']} · "
+        f"종목 {res['n']} · 분류 {mapped}/{res['n']}"
+    )
+    for g, n in Counter(v["theme_group"] for v in res["stocks"].values()).most_common():
+        typer.echo(f"  {g:8s} {n}")
+
+
 model_app = typer.Typer(help="Model Plane (M-v2): CMA→Optimizer 사전연산 레지스트리")
 app.add_typer(model_app, name="model")
 

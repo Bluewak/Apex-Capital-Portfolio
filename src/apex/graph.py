@@ -58,6 +58,35 @@ def theme_parent(subtheme: str) -> str:
     return subtheme.split(".", 1)[0]
 
 
+def _norm_ticker(t: str) -> str:
+    return t.upper().replace(".", "-")
+
+
+def theme_exposure(
+    holdings: dict[str, float], membership: dict[str, dict], level: str = "theme_group"
+) -> dict[str, float]:
+    """포트(개별종목 포함) → 테마 노출(가중 룩스루, §8). 종목은 membership으로 테마 매핑.
+
+    ``level``='theme_group'(테마군 8) | 'subtheme'(세부테마). ETF는 보유종목 룩스루
+    데이터 부재 시 제외(E3, docs/12 §10) — 개별종목 편입분만 집계. 단일소속 종목은 w=배정비중.
+    """
+    agg: dict[str, float] = {}
+    for tk, w in holdings.items():
+        info = membership.get(_norm_ticker(tk))
+        if info:
+            agg[info[level]] = agg.get(info[level], 0.0) + w
+    return {k: round(v, 6) for k, v in agg.items()}
+
+
+def because_theme(theme: str, holdings: dict[str, float], membership: dict[str, dict]) -> list[str]:
+    """테마 노출 근거경로: theme(테마군/세부테마)에 기여한 종목 목록(정규화·재현가능)."""
+    return sorted(
+        tk for tk in holdings
+        if (info := membership.get(_norm_ticker(tk))) is not None
+        and theme in (info["theme_group"], info["subtheme"])
+    )
+
+
 def ancestors(node: str) -> set[str]:
     """subClassOf 이행 클로저(결정론). node 자신은 제외."""
     out: set[str] = set()
