@@ -4,7 +4,8 @@
 
 ## 지금 어디인가
 
-**v2 진행 중 · Step 0·1 완료 → 다음 Step 2(Model Plane).**
+**v2 Step 0~3 전부 완료 · 4평면(Data·Model·Serving·Advisory)+Run Ledger 구현(pytest 95).**
+잔여는 선택·비차단(골든 대사·FX 실소싱·DSR/PBO·핀 커밋·LLM Narrator 실교체).
 어떤 작업이든 **착수 전 아래 두 문서를 먼저 읽고 방향을 정합**한다:
 
 - **방향성 북극성 → [docs/11-direction.md](docs/11-direction.md)** — why/direction + 절대 가드레일(§5) + 워치리스트. **v2 작업 전 §5 필독.**
