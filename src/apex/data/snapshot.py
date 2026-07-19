@@ -23,6 +23,9 @@ ARTIFACTS = Path("artifacts/snapshots")
 
 def fetch_raw(ticker: str, start: str = "2005-01-01", end: str | None = None) -> pd.DataFrame:
     """raw OHLCV + 이벤트 (auto_adjust=False). Adj Close는 대사 레퍼런스용으로만."""
+    from apex.data.netfix import ensure_ascii_ca
+
+    ensure_ascii_ca()  # 비ASCII 경로(한글 사용자명) SSL 우회
     import yfinance as yf
 
     df = yf.Ticker(ticker).history(

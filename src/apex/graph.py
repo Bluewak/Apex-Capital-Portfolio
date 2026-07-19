@@ -87,6 +87,32 @@ def because_theme(theme: str, holdings: dict[str, float], membership: dict[str, 
     )
 
 
+def theme_exposure_lookthrough(
+    portfolio: dict[str, float],
+    membership: dict[str, dict],
+    etf_holdings: dict[str, dict[str, float]],
+    level: str = "theme_group",
+) -> dict[str, float]:
+    """포트(ETF+개별종목) → 테마 노출(가중 룩스루 §8, 이중계상 없음, E3).
+
+    ETF는 보유종목으로 분해: 배정비중 × 보유비중 → 그 종목의 테마에 배정. 개별종목은 직접.
+    top-N 보유·해외종목 미매핑으로 **커버리지<100%**(나머지는 미집계) — 부분 룩스루.
+    """
+    agg: dict[str, float] = {}
+    for tk, w in portfolio.items():
+        etf_h = etf_holdings.get(_norm_ticker(tk)) or etf_holdings.get(tk)
+        if etf_h:  # ETF → 보유종목 룩스루
+            for stock, wh in etf_h.items():
+                info = membership.get(_norm_ticker(stock))
+                if info:
+                    agg[info[level]] = agg.get(info[level], 0.0) + w * wh
+        else:  # 개별종목 직접
+            info = membership.get(_norm_ticker(tk))
+            if info:
+                agg[info[level]] = agg.get(info[level], 0.0) + w
+    return {k: round(v, 6) for k, v in agg.items()}
+
+
 def ancestors(node: str) -> set[str]:
     """subClassOf 이행 클로저(결정론). node 자신은 제외."""
     out: set[str] = set()

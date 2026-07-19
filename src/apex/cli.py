@@ -250,6 +250,20 @@ def data_membership(
         typer.echo(f"  {g:8s} {n}")
 
 
+@data_app.command("holdings")
+def data_holdings(
+    no_pin: bool = typer.Option(False, "--no-pin", help="artifacts 피닝 생략"),
+) -> None:
+    """ETF 상위 보유종목 수집·피닝(E3): ETF 포트 → 종목/테마 룩스루."""
+    from apex.data import holdings
+
+    h = holdings.pull_holdings(pin=not no_pin)
+    typer.echo(f"holdings_version {h['holdings_version']}")
+    for etf, hh in h["holdings"].items():
+        top = " ".join(f"{s}{w * 100:.0f}" for s, w in list(hh.items())[:3])
+        typer.echo(f"  {etf:10s} 보유 {len(hh):2d}종  {top}")
+
+
 model_app = typer.Typer(help="Model Plane (M-v2): CMA→Optimizer 사전연산 레지스트리")
 app.add_typer(model_app, name="model")
 
