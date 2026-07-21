@@ -1,14 +1,25 @@
 # S&P 500 유니버스 페이지 생성기
 
-최근 N개년(기본 5년) 동안 S&P 500에 **한 번이라도 편입된 모든 종목**을 수집해
-**섹터별 HTML 페이지**로 출력한다.
+최근 N개년(기본 **20년**, 백테스트 20년+와 룩백 정합) 동안 S&P 500에 **한 번이라도 편입된 모든 종목**을 수집해
+[docs/07-asset-classes.md](../../docs/07-asset-classes.md) **§6 개별종목 테마 분류 체계**로
+재분류한 **HTML 페이지**로 출력한다. (§6의 인터랙티브 실측 뷰)
 
-## 데이터 출처 (모두 무료, D7 정합)
+> 개별종목 산출물이므로 **v2 로드맵용 · MVP(ETF-only, 01 D3·02 §4) 범위 밖**이다.
 
-- **Wikipedia — "List of S&P 500 companies"**
-  - 현재 구성종목 표: 티커·기업명·GICS 섹터·서브인더스트리·편입일
-  - "Selected changes" 표: 편입/편출 이력(날짜·티커·사유)
-- **yfinance** (선택): 편출된 종목의 섹터 보강. 실패 시 `미분류 (편출)`로 표기.
+## 분류 축 (07 §6 정본 복제)
+
+- **1차 분할**: `테마군(8) → 세부테마` — GICS Sub-Industry 크로스워크(07 §6.3)로 결정.
+  현재 구성종목은 세부테마까지 100% 자동 배정(미매칭 0). 편출종목은 테마군까지 축소 매핑(`*.기타`/미분류).
+- **2차 오버레이**: `메가트렌드 태그`(`#AI` `#CYBER` `#CLOUD` `#GLP1` `#EV` `#CLEAN` `#DEFENSE`, 07 §6.5) — 티커 집합, 다중 태그. HTML 상단 멀티셀렉트 필터.
+
+> 크로스워크·태그의 **정본은 07 §6.3·§6.5**이고 이 스크립트는 복제다. 둘이 어긋나면 문서를 우선한다.
+
+## 데이터 출처 (무료)
+
+- **Wikipedia — "List of S&P 500 companies"**: 현재 구성종목(티커·기업명·GICS 섹터·**Sub-Industry**·편입일) + "Selected changes"(편입/편출 이력).
+- **yfinance**: 편출종목의 섹터 보강(→ 테마군). 실패 시 `미분류`.
+
+> 정합 주의: 01 **D7**이 열거한 무료 소스는 yfinance/FRED/Stooq이며 Wikipedia는 목록에 없다(무료원칙엔 부합). D7에 'S&P500 구성종목/편입이력 = Wikipedia' 보강 각주를 두었다(01 D7 참조).
 
 > 합집합 = **현재 구성종목 ∪ 기간 내 편출 종목**. 재편입(편출됐다가 복귀)은 '현재'로 취급.
 
@@ -21,18 +32,21 @@ pip install -r requirements.txt
 ## 실행
 
 ```bash
-python build_sp500_universe.py                # 최근 5년, sp500_by_sector.html 생성
+python build_sp500_universe.py                # 최근 20년(기본), sp500_by_sector.html 생성
 python build_sp500_universe.py --years 3      # 기간 변경
-python build_sp500_universe.py --no-enrich    # yfinance 섹터 보강 생략(빠름)
-python build_sp500_universe.py -o docs/sp500.html
+python build_sp500_universe.py --no-enrich    # 편출종목 yfinance 보강 생략(빠름)
+python build_sp500_universe.py -o out.html
 ```
 
 ## 출력
 
-단일 HTML 파일(오프라인 열람 가능). 섹터별 섹션 + 검색창 + 현재/편출 배지 + 요약 통계.
+단일 HTML(오프라인 열람). `테마군` 아코디언 → `세부테마` 하위 그룹 → 종목 테이블(티커·기업명·GICS 섹터·Sub-Industry·태그·현재/편출 배지). 상단: 검색 + 메가트렌드 태그 필터 + 요약 통계.
 
-## 주의
+2026-07-07 20개년 실행: 현재 503 + 편출 353 = **840종**, 8 테마군, 세부테마 100% 매칭(현재종목 미매칭 0). 편출 353종 중 상폐분은 yfinance 조회 실패로 미분류(정상 폴백).
 
-- Wikipedia 표 구조가 바뀌면 파싱이 실패할 수 있다(에러 메시지로 안내).
-- 편출 종목 다수는 피인수·상장폐지로 yfinance 조회가 안 될 수 있어 `미분류 (편출)`로 분류된다.
-- 섹터 분류 기준은 **GICS**(Wikipedia 표기)를 따른다. yfinance 섹터명은 GICS로 매핑해 정합을 맞춘다.
+## 주의 / 한계
+
+- Wikipedia 표 구조 변경 시 파싱 실패 가능(에러로 안내). GICS Sub-Industry 명칭은 쉼표 유무 차이를 정규화로 흡수.
+- 편출종목 다수는 피인수·상장폐지로 yfinance 조회 실패 → `미분류`. (콘솔의 `HTTP Error 404`는 이 경우이며 정상 폴백)
+- **생존편향·기간 불일치(2026-07-07 해소)**: 20개년 합집합으로 확장해 백테스트 20년+(01 §5)와 룩백 정합(07 §7). Wikipedia 변경이력이 1976~ 담아 20년 편출 포착. 잔여: 상폐 편출종목은 yfinance 섹터 조회 실패로 `미분류`(테마 보강 불가) — point-in-time 정밀 편입일·상폐종목 분류는 v2 정밀화.
+- 미매칭 Sub-Industry가 생기면 콘솔에 `[!] ... 07 §6.3 보강 후보`로 출력 → 문서에 반영.

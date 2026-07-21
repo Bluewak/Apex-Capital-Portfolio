@@ -1,0 +1,55 @@
+[project]
+name = "apex-capital-portfolio"
+version = "0.1.0"
+description = "AI 기반 글로벌 포트폴리오 매니저 — 분석형 리포트 서비스 (MVP)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+dependencies = [
+    "pydantic>=2.7",        # 06 §3 서비스 계약(스키마)
+    "pandas>=2.2",          # 05 지표 계산
+    "numpy>=1.26",
+    "yfinance>=0.2.40",     # 시세·배당 (D7)
+    "pandas-datareader>=0.10",  # FRED(환율·금리), Stooq 폴백 (D7)
+    "jinja2>=3.1",          # 04 §2 리포트 렌더
+    "typer>=0.12",          # CLI (프론트 = 명령줄)
+    "finance-datareader>=0.9.202",
+]
+
+[project.scripts]
+apex = "apex.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/apex"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# tools/sp500는 독립 유틸: HTML/CSS f-string·한글 매핑 dict의 긴 줄은 예외
+"tools/**" = ["E501"]
+# report는 HTML/CSS 템플릿 문자열: 긴 줄 예외
+"src/apex/report/__init__.py" = ["E501"]
+# advisory는 한글 서술(Narrator) 템플릿 문자열: 긴 줄 예외
+"src/apex/advisory.py" = ["E501"]
+# web은 HTML 설문 폼 템플릿 문자열: 긴 줄 예외
+"src/apex/web.py" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

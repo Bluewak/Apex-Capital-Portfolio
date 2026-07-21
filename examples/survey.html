@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Apex 투자성향 설문 — answers.json 생성</title>
+<style>
+  :root{--bg:#eef1f4;--card:#fff;--ink:#16202f;--muted:#586576;--line:#d9e0e8;--accent:#0e5a63;--soft:#0e5a6314}
+  @media(prefers-color-scheme:dark){:root{--bg:#0b0f14;--card:#141b23;--ink:#e7ecf2;--muted:#9aa7b6;--line:#26313c;--accent:#3ba7a0;--soft:#3ba7a01f}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,"Malgun Gothic","Noto Sans KR",Segoe UI,sans-serif;letter-spacing:-.003em}
+  .wrap{max-width:640px;margin:0 auto;padding:28px 20px 64px}
+  .eyebrow{font:600 11px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:25px;margin:.3em 0 .3em;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 8px}
+  .disclaimer{background:var(--soft);border:1px solid color-mix(in srgb,var(--accent) 26%,transparent);border-radius:10px;padding:11px 14px;font-size:12.5px;margin:14px 0 20px}
+  .reelicit{background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:12px;padding:14px 16px;margin-top:14px}
+  .q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+  .q label{display:block;font-weight:600;font-size:14px;margin-bottom:8px}
+  .q .hint{font-weight:400;color:var(--muted);font-size:12.5px}
+  select,input{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px}
+  button{font:600 15px inherit;padding:12px 18px;border-radius:10px;border:0;background:var(--accent);color:#fff;cursor:pointer;margin-top:6px}
+  button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+  .out{margin-top:18px;display:none}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;overflow-x:auto;font:12.5px ui-monospace,monospace;color:var(--ink)}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .foot{margin-top:22px;font-size:11.5px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);padding-top:12px}
+  code{font-family:ui-monospace,monospace;background:var(--soft);padding:1px 6px;border-radius:5px}
+</style></head>
+<body><div class="wrap">
+  <div class="eyebrow">Apex · 진입 설문 (M6)</div>
+  <h1>투자 성향 설문</h1>
+  <p class="sub">10문항에 답하면 <code>answers.json</code>을 만들어 드립니다. 이 파일로 <code>apex run --input answers.json</code>을 실행하세요.</p>
+  <div class="disclaimer">본 서비스는 <b>유형별 교육·분석 정보</b>이며 개별 투자자문·투자권유가 아닙니다. 금액은 <b>구간(밴드)</b>으로만 받아 개인식별정보를 저장하지 않습니다.</div>
+
+  <form id="f">
+    <div class="q"><label>Q1. 나이</label><input type="number" id="q1_age" min="19" max="100" value="45" required></div>
+    <div class="q"><label>Q2. 투자 기간</label>
+      <select id="q2_horizon"><option value="1">3년 미만</option><option value="2">3~5년</option><option value="3" selected>5~7년</option><option value="4">7~10년</option><option value="5">10년 이상</option></select></div>
+    <div class="q"><label>Q3. 투자 목적</label>
+      <select id="q3_objective"><option>보전</option><option selected>균형</option><option>증식</option></select></div>
+    <div class="q"><label>Q4. 투자금 규모 <span class="hint">(구간)</span></label>
+      <select id="q4_capital"><option value="5000000">1천만 미만</option><option value="30000000" selected>1천만~5천만</option><option value="75000000">5천만~1억</option><option value="200000000">1억~3억</option><option value="500000000">3억 이상</option></select></div>
+    <div class="q"><label>Q5. 월 적립 가능액 <span class="hint">(구간)</span></label>
+      <select id="q5_monthly"><option value="0" selected>없음</option><option value="200000">~30만</option><option value="500000">30~70만</option><option value="1000000">70만 이상</option></select></div>
+    <div class="q"><label>Q6. 1년 내 감내 가능한 최대 손실 <span class="hint">(핵심 — 클수록 공격적)</span></label>
+      <select id="q6_max_loss"><option value="-0.05">−5% (거의 잃고 싶지 않다)</option><option value="-0.10">−10%</option><option value="-0.15" selected>−15%</option><option value="-0.25">−25%</option><option value="-0.35">−35% 이상</option></select></div>
+    <div class="q"><label>Q7. 투자 경험</label>
+      <select id="q7_experience"><option>없음</option><option selected>보통</option><option>많음</option></select></div>
+    <div class="q"><label>Q8. 단기 현금 필요(원화 지출)</label>
+      <select id="q8_liquidity"><option>낮음</option><option selected>보통</option><option>높음</option></select></div>
+    <div class="q"><label>Q9. 환노출 선호 <span class="hint">(해외자산은 환율 변동 위험이 있습니다)</span></label>
+      <select id="q9_fx"><option>회피</option><option selected>일부허용</option><option>허용</option></select></div>
+    <div class="q"><label>Q10. 손실이 났을 때 나의 행동</label>
+      <select id="q10_behavior"><option>매도</option><option selected>유지</option><option>추가매수</option></select></div>
+
+    <div class="row"><button type="submit">answers.json 만들기</button></div>
+  </form>
+
+  <div class="reelicit" id="reelicit" style="display:none">
+    <b>먼저 확인해 주세요 · 재보정</b>
+    <p style="margin:8px 0;font-size:13.5px">‘거의 무손실(−5%)’과 ‘물가+α(증식·균형)’는 동시에 갖기 어렵습니다. 예금은 명목 손실이 거의 없지만 10년 물가를 반영하면 실질 구매력이 줄어듭니다(그것도 손실). 물가+α를 원하면 6년에 한 번쯤 −10% 안팎 변동을 받아들여야 합니다. 어느 쪽이 더 중요하신가요?</p>
+    <div class="row"><button type="button" id="re-safe">무손실이 우선 (→ 보전)</button><button type="button" class="ghost" id="re-grow">물가+α가 우선 (그대로 진행)</button></div>
+  </div>
+
+  <div class="out" id="out">
+    <pre id="json"></pre>
+    <div class="row"><button class="ghost" id="copy">복사</button><button class="ghost" id="dl">다운로드</button></div>
+    <p class="sub" style="margin-top:10px">터미널에서: <code>apex run --input answers.json --out report.html</code></p>
+  </div>
+
+  <div class="foot">원금 손실이 발생할 수 있으며 과거 성과는 미래 수익을 보장하지 않습니다. 개인 맞춤 자문이 아닌 유형별 교육 정보입니다.</div>
+</div>
+<script>
+  const f = document.getElementById('f');
+  const idsNum = ['q1_age','q2_horizon','q4_capital','q5_monthly'];
+  const idsFloat = ['q6_max_loss'];
+  function build(){
+    const o = {};
+    o.q1_age = +q1_age.value;
+    o.q2_horizon = +q2_horizon.value;
+    o.q3_objective = q3_objective.value;
+    o.q4_capital = +q4_capital.value;
+    o.q5_monthly = +q5_monthly.value;
+    o.q6_max_loss = +q6_max_loss.value;
+    o.q7_experience = q7_experience.value;
+    o.q8_liquidity = q8_liquidity.value;
+    o.q9_fx = q9_fx.value;
+    o.q10_behavior = q10_behavior.value;
+    o.input_snapshot_id = 'web-' + Date.now();
+    return o;
+  }
+  let last = '';
+  function contradiction(){
+    return +q6_max_loss.value >= -0.05 && (q3_objective.value === '증식' || q3_objective.value === '균형');
+  }
+  function generate(){
+    last = JSON.stringify(build(), null, 2);
+    document.getElementById('json').textContent = last;
+    document.getElementById('reelicit').style.display = 'none';
+    document.getElementById('out').style.display = 'block';
+  }
+  f.addEventListener('submit', e => {
+    e.preventDefault();
+    // 재보정 관문(R5): 모순 주문이면 먼저 재질문
+    if (contradiction() && document.getElementById('reelicit').style.display === 'none') {
+      document.getElementById('reelicit').style.display = 'block';
+      return;
+    }
+    generate();
+  });
+  document.getElementById('re-safe').addEventListener('click', () => { q3_objective.value = '보전'; generate(); });
+  document.getElementById('re-grow').addEventListener('click', () => generate());
+  document.getElementById('copy').addEventListener('click', () => navigator.clipboard && navigator.clipboard.writeText(last));
+  document.getElementById('dl').addEventListener('click', () => {
+    const b = new Blob([last], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = 'answers.json'; a.click();
+  });
+</script>
+</body></html>
