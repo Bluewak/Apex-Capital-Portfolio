@@ -5,6 +5,8 @@
 
 > **범위 규정.** "규제 제외"는 *법적 규제 전략*(자문업 등록/제휴/샌드박스, 광고·성과표시 규제, 금소법 동의·설명 절차, 개인정보 처리방침·법률의견)을 뜻한다.
 > 코드의 `compliance` **가드레일 모듈**(차단·강등)은 기술 컴포넌트이므로 유지·개선 대상이다. PII 밴드화는 *데이터 위생·재현성·LLM 프라이버시 게이트웨이* 관점에서 포함하되, 그 위의 *동의·고지 절차*는 규제 트랙(§12)으로 뺀다.
+>
+> **AI·지식 계층 반영(2026-07-17).** 온톨로지/KG·GraphRAG·LLM 설명 모델 배치를 본 설계에 정식 반영한다(§3.4·§3.7). 대원칙: **판정 경로(배분·리스크·compliance)에는 어떤 AI 모델도 붙이지 않는다.** AI는 지식·검색·설명 계층에만 — "정확도"는 두 개(판정=결정론 퀀트, 설명=grounded LLM)이고 위치가 다르다.
 
 관련 문서: [06 아키텍처](06-architecture.md) · [08 개발계획](08-dev-plan.md) §6·§7 · [05 리스크](05-risk-metrics.md) · [09 CS 런북](09-cs-runbook.md)
 
@@ -28,9 +30,9 @@
 
 ---
 
-## 1. v2 설계 원리 6 (패널 수렴)
+## 1. v2 설계 원리 7 (패널 수렴)
 
-모든 개선은 아래 6개 원리로 압축된다. 각 원리는 여러 팀이 독립적으로 도달했다.
+모든 개선은 아래 7개 원리로 압축된다. 각 원리는 여러 팀이 독립적으로 도달했다.
 
 1. **결정론 코어 / 자문 계층 분리.** 숫자·판정은 결정론·해시·감사. 서술(설명문·LLM)은 비결정론·캐시로 격리하며 **수치 해시 밖**에 둔다.
 2. **핀 우선 서빙.** 런타임은 피닝 스냅샷만 읽는다. 라이브 수집은 `apex data pull`에서만.
@@ -38,6 +40,7 @@
 4. **교체 가능 서비스(SPI).** 각 단계는 Protocol. 룰 구현이 기본, 최적화·LLM 구현이 계약 불변으로 교체.
 5. **유형 단위 사전연산.** 5성향×min_cash 그리드를 `data_version`당 1회 사전연산 → 사용자 런은 밀리초 조회.
 6. **forward + realized 병기.** 차단 지표는 forward(레짐·불확실성 반영) 기대손실, 실현치는 disclosed로 병기.
+7. **지식 그래프 grounding.** 설명·검색·이해의 정확도는 온톨로지/KG + GraphRAG로 올린다(§3.7). 판정·수치 정확도는 퀀트 모델(②)이 올리며 여기에 RAG/LLM/GNN은 금지.
 
 ---
 
@@ -184,6 +187,28 @@ def run_advice(cmd: AdviceCommand) -> AdviceRun:            # cmd = answers, dis
 - **캐시 결정론.** `(fact_ledger_hash × prompt_version × model_id)` 키로 서술 캐시. 동일 입력이면 캐시 서술 그대로 → "동일 입력=동일 리포트" 유지. (`temperature=0` 결정론은 최신 Claude에서 성립 안 함 — 재현성은 **캐시**로 확보.)
 - **`narrative_hash`**는 감사용, `numeric_result_hash`에 **미포함**.
 
+#### 3.4.1 AI 모델·기술 배치 (Step 2·3에서 이대로 구현)
+
+| 계층/부분 | 붙일 것 | 모델 ID / 기술 | 비고 |
+| -- | -- | -- | -- |
+| 판정(숫자·배분) | 통계·최적화 | Ledoit-Wolf + cvxpy/Clarabel | **AI 없음**(재현성·규제) |
+| 온톨로지 검증 | 결정론 | rdflib/OWL + pySHACL | §3.7 자리1 |
+| 온톨로지 추출(1회 배치) | LLM+인간검토 | `claude-opus-4-8` + structured outputs | §3.7 구축 |
+| 임베딩(문서·정의) | 벡터 | BGE-M3(자체호스팅) / Voyage `voyage-3.5` | **Anthropic 임베딩 API 없음**. 한국어+프라이버시→자체호스팅 |
+| GraphRAG 검색 | 그래프+벡터 | Cypher/SPARQL + LlamaIndex PropertyGraphIndex | 무거운 MS GraphRAG는 v3 |
+| 표준 서술(ok·대량) | LLM | `claude-sonnet-5` ($3/$15, 도입 $2/$10~2026-08-31) | 품질/비용 균형 |
+| 민감 서술(hold·강등·취약자) | LLM | `claude-opus-4-8` ($5/$25) | 뉘앙스·안전 |
+| 가드레일 분류(개인지시·규제발화) | LLM | `claude-haiku-4-5` ($1/$5) | 매 턴 in/out·저지연 |
+| 자문 게이트 judge(사실성·톤) | LLM | `claude-opus-4-8` + **Batch(−50%)** | 야간 배치 |
+
+기본값: 불확실하면 전부 `claude-opus-4-8`(레퍼런스 권장). **거부**: `claude-fable-5`($10/$50, 과투자), LLM 파인튜닝(재현성·비용 악화), 판정 경로 RAG/LLM/GNN.
+
+#### 3.4.2 grounding·재현성·배포 제약 (구현 전 필수 인지)
+
+- **grounding 두 경로 — 한 호출 병용 불가**(`citations` + `output_config.format` = 400): 리포트 본문 = **structured outputs**(숫자 슬롯을 우리가 주입 → 창작 원천 차단) / "왜?" Q&A = **Citations**(`cited_text` 인용 → 추적가능). 두 경로를 분리 호출.
+- **재현성**: 최신 Claude는 `temperature` 제거(400) → 결정론은 **캐시**(`fact_ledger_hash × prompt_version × model_id`)로. 프롬프트 캐싱은 온톨로지·시스템프롬프트를 프리픽스로(캐시읽기 ~0.1x), FactLedger 값은 브레이크포인트 **뒤**.
+- **배포**: 기본 = 1P Claude API + `inference_geo`(데이터 거주지 · Batch·자동캐싱·Files 지원). 파트너 인리전 강제 시 = Amazon Bedrock 서울(`AnthropicBedrockMantle`, `ap-northeast-2`, 모델 ID `anthropic.` 접두 — 단 Batch·자동캐싱 미지원).
+
 ### 3.5 ③의 compliance 가드레일 개선 (기술)
 
 | 항목 | v1 | v2 |
@@ -200,6 +225,28 @@ def run_advice(cmd: AdviceCommand) -> AdviceRun:            # cmd = answers, dis
 - **`store/` 실구현.** 06 §5 6테이블을 append-only 온디스크(JSON→후에 SQLite/DB). 매 런 = `{run_id, created_at, actor?, tenant?, input_snapshot_id, data_version, model_version, schema_version, env_hash, decision, downgrade_path, breaches, numeric_result_hash, narrative_hash, prompt_version, gate_results}`.
 - **불변·해시체인.** 각 레코드가 직전 해시 포함 → 변조 탐지. WORM 지향.
 - **`apex replay --run-id`.** 원장에서 `(data_version, model_version, schema_version, env_hash)`를 복원해 재실행 → 수치필드 `rtol≤1e-6` 재현 + diff 리포트. "재현성"이 주장에서 실행 명령이 된다.
+
+### 3.7 Knowledge Plane — 온톨로지/KG (신규 · ML·AI 레인)
+
+"여러 변수의 유기적 관계"(자산↔자산군↔리스크팩터↔통화↔성향↔제약↔시나리오↔벤치마크)를 **명시적 그래프**로 세운다. **두 자리**에서 값을 낸다.
+
+- **자리 1 — 결정론 검증(LLM 아님).** 그래프 제약(SHACL/그래프쿼리)이 ③ Serving·②의 검증을 강화한다: 팩터 레벨 집중도(`Asset→loadsOn→Factor`), 룩스루 중복(`SPY overlaps QQQ`), 통화노출(`Asset→exposedTo→Currency`, 하드코딩 USD 제거), 밴드 정합(`Portfolio→holds→AssetClass` vs `Profile→hasBand`), 시나리오 일관성(`Scenario→shocks→Factor→loadsOn`). → 퀀트 findings를 기계검증화(수치 정확도에도 기여).
+- **자리 2 — grounding 백본.** `FactLedger` + 이 KG + 문서(05 정의·07 자산군·IPS)가 ④ Advisory GraphRAG의 grounding 소스. 관계 다홉 질문("왜 안정형인데 2022 −20%?" → 채권 듀레이션 팩터 → 2022 금리충격)에 **추적가능한** 근거·경로.
+
+온톨로지 스케치(FIBO 정렬 · 경량 시작 — `universe.py`·07 §2·05 §3의 암묵 관계가 이미 ~70% 존재):
+
+```text
+엔티티 : Asset · AssetClass · RiskFactor · Currency · Region
+         · Profile · ModelPortfolio · Constraint · Metric · Scenario · Benchmark
+관계   : Asset —belongsTo→ AssetClass · —loadsOn→ RiskFactor{w} · —exposedTo→ Currency
+         · —overlaps→ Asset{lookthrough}
+         ModelPortfolio —holds→ Asset{w} · —forProfile→ Profile
+         Profile —hasBand→ AssetClass{min,max} · —hasLimit→ Metric
+         Scenario —shocks→ RiskFactor{mag} · Benchmark —proxies→ Asset(TR)
+```
+
+- **구현**: 경량 시작 = `rdflib`(OWL) + `pySHACL` 검증(또는 타입드 pydantic 그래프). 확장 = Neo4j / Ontotext GraphDB(FIBO 네이티브). FIBO 전체 정렬·대규모 GraphRAG(reranker 등)는 v3(§12).
+- **거부**: 관계를 학습된 GNN 임베딩으로 대체 — 블랙박스·감사 불가. 명시적 온톨로지가 이 프로젝트(결정론·추적)에 맞다.
 
 ---
 
@@ -274,8 +321,8 @@ class Narrator(Protocol):          DETERMINISM_REQUIRED = False; def narrate(sel
 
 - **Step 0 — 재현성 실체화 (며칠~1주).** 핀 소비(`loader`+`snapshot.load_pinned`) · `data_version`=매니페스트 · `tobytes` 제거→canonical 해시 · **`NumericResult`/`Narrative` 분리**(explanation/reelicitation을 해시 밖으로) · `store/` 최소 원장 · CI(재현성·결정론경계·property-real) · env 핀. → *"M4~M6 완료"가 처음으로 참이 됨.*
 - **Step 1 — 계약·SPI (1주).** 전 모델 `schema_version`/버전 전파 · `ComplianceDecision` validator · `Allocation.profile→Profile` · SPI Protocol + pipeline DI.
-- **Step 2 — Model Plane (2~4주).** CMA 엔진 · FX/금리 실소싱(하드코딩 제거) · Optimizer(결정론·유형단위) → 사전연산 그리드 · 레지스트리 · forward risk + realized · **compliance binding 지표 교체**(§3.5) · 검증 게이트(DSR/PBO/VaR-backtest) · 골든 대사(§3.1).
-- **Step 3 — Serving + Advisory (2~3주).** `run_advice`(사전연산 O(1) 루프) · FactLedger · Advisory Plane(LLM 게이트웨이+게이트+캐시+폴백) · FastAPI 서비스 + 웹 브리지 · `apex replay`.
+- **Step 2 — Model Plane + Knowledge (2~4주).** CMA 엔진(Ledoit-Wolf) · FX/금리 실소싱(하드코딩 제거) · Optimizer(cvxpy/Clarabel·유형단위) → 사전연산 그리드 · 레지스트리 · forward risk + realized · **compliance binding 지표 교체**(§3.5) · 검증 게이트(DSR/PBO/VaR-backtest) · 골든 대사(§3.1) · **경량 온톨로지/KG(§3.7) + 결정론 관계검증**(집중도·룩스루·통화·밴드·시나리오).
+- **Step 3 — Serving + Advisory (2~3주).** `run_advice`(사전연산 O(1) 루프) · FactLedger · Advisory Plane(LLM 게이트웨이+게이트+캐시+폴백) · **모델 배치(§3.4.1)**: 표준=`claude-sonnet-5`·민감=`claude-opus-4-8`·가드레일=`claude-haiku-4-5`·judge=`claude-opus-4-8` batch · **GraphRAG grounding(§3.7 자리2 · structured outputs/Citations 분리 §3.4.2)** · FastAPI 서비스 + 웹 브리지 · `apex replay`.
 
 > **규율(PM 레인).** 폭(개별종목·세금·다통화·RL)을 Step 0~3에 **하나도 넣지 않는다.** 지금 넣으면 결정론·재현성 토대가 서기 전에 무너지고, v3(§12)의 폭은 자격·검증 후에만.
 
@@ -320,6 +367,7 @@ v2:  [오프라인] pull(핀·골든대사) → TR → CMA → optimize(유형·
 
 ### v3 폭 (자격·검증 후)
 - 개별종목 유니버스(point-in-time·생존편향 데이터 전제), 세금·계좌인지 최적화, 이중통화 전량 재계산, RL 배분(결정론·설명가능성 리스크로 신중론).
+- **지식·AI 확장**: FIBO 전체 정렬, 대규모 GraphRAG 인프라(Neo4j/GraphDB·reranker), 리포트 Q&A 챗(Citations grounded).
 
 ---
 

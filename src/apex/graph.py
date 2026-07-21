@@ -113,6 +113,36 @@ def theme_exposure_lookthrough(
     return {k: round(v, 6) for k, v in agg.items()}
 
 
+def stock_exposure_lookthrough(
+    weights: dict[str, float],
+    etf_holdings: dict[str, dict[str, float]],
+    stock_universe: set[str] | None = None,
+) -> tuple[dict[str, float], float]:
+    """포트(ETF+개별종목) → **실효 개별종목 노출** + 룩스루 커버리지(§8, 이중계상 없음).
+
+    ETF는 보유종목으로 분해(배정비중×보유비중), ``stock_universe``의 개별종목은 직접(w=1).
+    holdings 없는 ETF(채권·금)나 미지 티커는 미분해(커버리지에서 제외). holdings가 top-N이라
+    **커버리지<100%**(나머지 미분해) — 부분 룩스루임을 covered로 정직 표기.
+
+    반환: ({stock: 실효비중}, covered=특정 종목으로 추적된 포트 비중).
+    """
+    eff: dict[str, float] = {}
+    covered = 0.0
+    for tk, w in weights.items():
+        n = _norm_ticker(tk)
+        etf_h = etf_holdings.get(n) or etf_holdings.get(tk)
+        if etf_h:  # ETF with holdings → 분해
+            for stock, hw in etf_h.items():
+                s = _norm_ticker(stock)
+                eff[s] = eff.get(s, 0.0) + w * hw
+                covered += w * hw
+        elif stock_universe is not None and n in stock_universe:  # 개별종목 직접
+            eff[n] = eff.get(n, 0.0) + w
+            covered += w
+        # else: holdings 없는 ETF(채권/금)·미지 → 미분해(covered 미포함)
+    return {k: round(v, 6) for k, v in eff.items()}, round(covered, 6)
+
+
 def ancestors(node: str) -> set[str]:
     """subClassOf 이행 클로저(결정론). node 자신은 제외."""
     out: set[str] = set()
